@@ -604,7 +604,9 @@ body {
 
   .bottom-nav,
   .scoring-bar {
-    max-width: 480px;
-    margin: 0 auto;
+    left: 50%;
+    right: auto;
+    width: 480px;
+    margin-left: -240px;
   }
 }
