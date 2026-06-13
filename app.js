@@ -231,9 +231,19 @@
     renderTeamChips('active-players-list-b', currentGame.teams.B.playerIds);
     renderScoringBar();
     renderEventLog();
+    syncPlayActivePadding();
 
     document.getElementById('undo-btn').disabled = currentGame.log.length === 0;
   }
+
+  function syncPlayActivePadding() {
+    const bar = document.getElementById('scoring-bar');
+    document.documentElement.style.setProperty('--scoring-bar-height', `${bar.offsetHeight}px`);
+  }
+
+  window.addEventListener('resize', () => {
+    if (currentGame) syncPlayActivePadding();
+  });
 
   function renderEventLog() {
     document.getElementById('event-log-count').textContent = currentGame.log.length;

@@ -296,7 +296,7 @@ body {
 }
 
 #play-active {
-  padding-bottom: 130px;
+  padding-bottom: calc(var(--scoring-bar-height, 0px) + var(--nav-height) - 16px + env(safe-area-inset-bottom));
 }
 
 .active-toolbar {
