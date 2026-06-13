@@ -16,14 +16,15 @@
 
 html, body {
   margin: 0;
-  height: 100%;
 }
 
 html {
+  min-height: 100%;
   background: #000;
 }
 
 body {
+  min-height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background: var(--bg);
   color: var(--text);
@@ -598,7 +599,6 @@ body {
   body {
     max-width: 480px;
     margin: 0 auto;
-    min-height: 100%;
     box-shadow: 0 0 0 1px var(--card-alt);
   }
 
