@@ -23,7 +23,7 @@
     play: document.getElementById('view-play'),
     players: document.getElementById('view-players'),
     history: document.getElementById('view-history'),
-    backup: document.getElementById('view-backup'),
+    menu: document.getElementById('view-menu'),
   };
   const navButtons = document.querySelectorAll('.nav-btn');
 
@@ -513,6 +513,9 @@
       e.target.value = '';
     }
   });
+
+  // ---------- Menu ----------
+  document.getElementById('app-version').textContent = window.APP_VERSION || 'dev';
 
   // ---------- Init ----------
   renderPlayers();

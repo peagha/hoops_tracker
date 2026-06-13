@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#111827">
 <title>Hoops Tracker</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=2026.06.13-1823">
 </head>
 <body>
 <header class="app-header">
@@ -87,23 +87,33 @@
   <div id="history-list"></div>
 </main>
 
-<main id="view-backup" class="view">
-  <h2>Backup &amp; Share</h2>
-  <p class="muted">Export everything (players + game history) as a JSON file, or share it. Importing replaces your current data.</p>
-  <button id="export-btn" class="btn-primary">Export / Share Backup</button>
-  <label class="btn-secondary file-btn">
-    Import Backup
-    <input id="import-input" type="file" accept="application/json">
-  </label>
+<main id="view-menu" class="view">
+  <h2>Menu</h2>
+
+  <section class="menu-section">
+    <h3 class="menu-section-heading">Backup &amp; Share</h3>
+    <p class="muted">Export everything (players + game history) as a JSON file, or share it. Importing replaces your current data.</p>
+    <button id="export-btn" class="btn-primary">Export / Share Backup</button>
+    <label class="btn-secondary file-btn">
+      Import Backup
+      <input id="import-input" type="file" accept="application/json">
+    </label>
+  </section>
+
+  <section class="menu-section">
+    <h3 class="menu-section-heading">Version</h3>
+    <p class="muted">Build <span id="app-version"></span></p>
+  </section>
 </main>
 
 <nav class="bottom-nav">
   <button data-view="play" class="nav-btn active">▶️<span>Play</span></button>
   <button data-view="players" class="nav-btn">👤<span>Players</span></button>
   <button data-view="history" class="nav-btn">📜<span>History</span></button>
-  <button data-view="backup" class="nav-btn">💾<span>Backup</span></button>
+  <button data-view="menu" class="nav-btn">☰<span>Menu</span></button>
 </nav>
 
-<script src="app.js"></script>
+<script>window.APP_VERSION = "2026.06.13-1823";</script>
+<script src="app.js?v=2026.06.13-1823"></script>
 </body>
 </html>
