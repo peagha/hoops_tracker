@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#111827">
+<title>Hoops Tracker</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="app-header">
+  <h1>🏀 Hoops Tracker</h1>
+</header>
+
+<main id="view-play" class="view active">
+  <div id="play-setup">
+    <h2>Start a game</h2>
+    <p class="muted">Name your teams and assign players.</p>
+    <div class="team-names">
+      <input id="team-a-name-input" type="text" value="Team A" maxlength="20" aria-label="Team A name">
+      <span class="vs">vs</span>
+      <input id="team-b-name-input" type="text" value="Team B" maxlength="20" aria-label="Team B name">
+    </div>
+    <div id="setup-players-list" class="assign-list"></div>
+    <button id="start-game-btn" class="btn-primary">Start Game</button>
+  </div>
+
+  <div id="play-active" class="hidden">
+    <div class="scoreboard">
+      <div class="scoreboard-team">
+        <div class="scoreboard-name" id="team-a-name"></div>
+        <div class="scoreboard-score" id="team-a-score">0</div>
+      </div>
+      <div class="scoreboard-sep">–</div>
+      <div class="scoreboard-team">
+        <div class="scoreboard-name" id="team-b-name"></div>
+        <div class="scoreboard-score" id="team-b-score">0</div>
+      </div>
+    </div>
+    <div class="active-toolbar">
+      <button id="undo-btn" class="btn-secondary">↩ Undo</button>
+      <button id="end-game-btn" class="btn-primary">End Game</button>
+    </div>
+    <div class="team-section">
+      <h3 class="team-heading" id="team-a-heading"></h3>
+      <div id="active-players-list-a" class="chip-grid"></div>
+    </div>
+    <div class="team-section">
+      <h3 class="team-heading" id="team-b-heading"></h3>
+      <div id="active-players-list-b" class="chip-grid"></div>
+    </div>
+    <details class="event-log">
+      <summary>Event Log (<span id="event-log-count">0</span>)</summary>
+      <div id="event-log-list" class="event-log-list"></div>
+    </details>
+    <button id="discard-game-btn" class="btn-text danger">Discard game</button>
+
+    <div id="scoring-bar" class="scoring-bar">
+      <div class="scoring-bar-header">
+        <span id="scoring-player-name">Tap a player to record stats</span>
+        <span id="scoring-player-stats"></span>
+      </div>
+      <div class="scoring-bar-breakdown" id="scoring-player-breakdown"></div>
+      <div class="scoring-bar-actions">
+        <button class="action-btn" data-stat="1">+1</button>
+        <button class="action-btn" data-stat="2">+2</button>
+        <button class="action-btn" data-stat="3">+3</button>
+        <button class="action-btn assist" data-stat="assists">+AST</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<main id="view-players" class="view">
+  <h2>Players</h2>
+  <ul id="players-list" class="players-list"></ul>
+  <form id="add-player-form" class="add-player-form">
+    <input id="new-player-name" type="text" placeholder="Player name" autocomplete="off" required>
+    <button type="submit" class="btn-primary">Add</button>
+  </form>
+</main>
+
+<main id="view-history" class="view">
+  <h2>History</h2>
+  <div id="history-list"></div>
+</main>
+
+<main id="view-backup" class="view">
+  <h2>Backup &amp; Share</h2>
+  <p class="muted">Export everything (players + game history) as a JSON file, or share it. Importing replaces your current data.</p>
+  <button id="export-btn" class="btn-primary">Export / Share Backup</button>
+  <label class="btn-secondary file-btn">
+    Import Backup
+    <input id="import-input" type="file" accept="application/json">
+  </label>
+</main>
+
+<nav class="bottom-nav">
+  <button data-view="play" class="nav-btn active">▶️<span>Play</span></button>
+  <button data-view="players" class="nav-btn">👤<span>Players</span></button>
+  <button data-view="history" class="nav-btn">📜<span>History</span></button>
+  <button data-view="backup" class="nav-btn">💾<span>Backup</span></button>
+</nav>
+
+<script src="app.js"></script>
+</body>
+</html>
