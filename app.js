@@ -48,8 +48,7 @@
 
   function describeLogEntry(entry) {
     const label = entry.stat === 'assists' ? 'AST' : `${entry.stat}PT`;
-    const sign = entry.val > 0 ? '+' : '−';
-    return `${entry.playerName} ${sign}${label}`;
+    return `${entry.playerName} +${label}`;
   }
 
   function renderEventLogItems(events) {
@@ -288,25 +287,20 @@
   document.querySelectorAll('#scoring-bar .action-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       if (!selectedPlayerId) return;
-      recordStat(selectedPlayerId, btn.dataset.stat, Number(btn.dataset.val));
+      recordStat(selectedPlayerId, btn.dataset.stat);
     });
   });
-
-  function statValue(stat, key) {
-    return key === 'assists' ? stat.assists : stat.shots[key];
-  }
 
   function adjustStat(stat, key, delta) {
     if (key === 'assists') stat.assists += delta;
     else stat.shots[key] += delta;
   }
 
-  function recordStat(playerId, key, val) {
+  function recordStat(playerId, key) {
     const stat = currentGame.stats[playerId];
-    if (statValue(stat, key) + val < 0) return;
-    adjustStat(stat, key, val);
+    adjustStat(stat, key, 1);
     const player = players.find(p => p.id === playerId);
-    currentGame.log.push({ playerId, playerName: player ? player.name : 'Unknown', stat: key, val, at: new Date().toISOString() });
+    currentGame.log.push({ playerId, playerName: player ? player.name : 'Unknown', stat: key, at: new Date().toISOString() });
     save(STORAGE.current, currentGame);
     renderActiveGame();
   }
@@ -314,7 +308,7 @@
   document.getElementById('undo-btn').addEventListener('click', () => {
     const last = currentGame.log.pop();
     if (!last) return;
-    adjustStat(currentGame.stats[last.playerId], last.stat, -last.val);
+    adjustStat(currentGame.stats[last.playerId], last.stat, -1);
     save(STORAGE.current, currentGame);
     renderActiveGame();
   });
