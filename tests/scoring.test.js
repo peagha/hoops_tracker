@@ -4,6 +4,7 @@ import { loadApp, click } from './helpers/load-app.js';
 const players = [
   { id: 'p1', name: 'Alice' },
   { id: 'p2', name: 'Bob' },
+  { id: 'p3', name: 'Charlie' },
 ];
 
 function activeGame() {
@@ -11,96 +12,172 @@ function activeGame() {
     id: 'g1',
     startedAt: new Date().toISOString(),
     teams: {
-      A: { name: 'Reds', playerIds: ['p1'] },
+      A: { name: 'Reds', playerIds: ['p1', 'p3'] },
       B: { name: 'Blues', playerIds: ['p2'] },
     },
     stats: {
       p1: { shots: { 1: 0, 2: 0, 3: 0 }, assists: 0 },
       p2: { shots: { 1: 0, 2: 0, 3: 0 }, assists: 0 },
+      p3: { shots: { 1: 0, 2: 0, 3: 0 }, assists: 0 },
     },
     log: [],
   };
 }
 
+function quickBtn(document, team, points) {
+  return document.querySelector(`.quick-btn[data-team="${team}"][data-points="${points}"]`);
+}
+
 describe('Scoring an active game', () => {
-  test('scoring bar is empty until a player is selected', () => {
+  test('shows large +3/+2 quick-score buttons for each team', () => {
     const { document } = loadApp({ storage: { hoops_players: players, hoops_current_game: activeGame() } });
 
-    expect(document.getElementById('scoring-bar').classList.contains('empty')).toBe(true);
-    document.querySelectorAll('#scoring-bar .action-btn').forEach(btn => {
-      expect(btn.disabled).toBe(true);
-    });
+    expect(quickBtn(document, 'A', '3')).not.toBeNull();
+    expect(quickBtn(document, 'A', '2')).not.toBeNull();
+    expect(quickBtn(document, 'B', '3')).not.toBeNull();
+    expect(quickBtn(document, 'B', '2')).not.toBeNull();
+    expect(document.getElementById('picker-overlay').classList.contains('hidden')).toBe(true);
   });
 
-  test('selecting a player enables the scoring bar and shows their stats', () => {
-    const { document } = loadApp({ storage: { hoops_players: players, hoops_current_game: activeGame() } });
-
-    click(document.querySelector('#active-players-list-a .player-chip'));
-
-    expect(document.getElementById('scoring-bar').classList.contains('empty')).toBe(false);
-    expect(document.getElementById('scoring-player-name').textContent).toBe('Alice');
-    expect(document.getElementById('scoring-player-stats').textContent).toBe('0 PTS · 0 AST');
-    document.querySelectorAll('#scoring-bar .action-btn').forEach(btn => {
-      expect(btn.disabled).toBe(false);
-    });
-  });
-
-  test('recording a 2pt shot updates the player chip, scoreboard and event log', () => {
+  test('tapping a quick button for a single-player team records the shot directly', () => {
     const { document, localStorage } = loadApp({ storage: { hoops_players: players, hoops_current_game: activeGame() } });
 
-    click(document.querySelector('#active-players-list-a .player-chip'));
-    click(document.querySelector('#scoring-bar .action-btn[data-stat="2"]'));
+    click(quickBtn(document, 'B', '2'));
 
-    expect(document.getElementById('team-a-score').textContent).toBe('2');
-    expect(document.querySelector('#active-players-list-a .player-chip-stats').textContent).toBe('2 PTS · 0 AST');
-    expect(document.getElementById('scoring-player-stats').textContent).toBe('2 PTS · 0 AST');
-    expect(document.getElementById('scoring-player-breakdown').textContent).toBe('1PT ×0 · 2PT ×1 · 3PT ×0');
-    expect(document.getElementById('event-log-count').textContent).toBe('1');
-    expect(document.getElementById('event-log-list').textContent).toContain('Alice +2PT');
+    expect(document.getElementById('picker-overlay').classList.contains('hidden')).toBe(true);
+    expect(document.getElementById('team-b-score').textContent).toBe('2');
+    expect(document.getElementById('feed').textContent).toContain('+2');
+    expect(document.getElementById('feed').textContent).toContain('Bob');
 
     const stored = JSON.parse(localStorage.getItem('hoops_current_game'));
-    expect(stored.stats.p1.shots[2]).toBe(1);
+    expect(stored.stats.p2.shots[2]).toBe(1);
     expect(stored.log).toHaveLength(1);
-
     expect(document.getElementById('undo-btn').disabled).toBe(false);
   });
 
-  test('recording an assist does not affect the score', () => {
-    const { document } = loadApp({ storage: { hoops_players: players, hoops_current_game: activeGame() } });
-
-    click(document.querySelector('#active-players-list-a .player-chip'));
-    click(document.querySelector('#scoring-bar .action-btn[data-stat="assists"]'));
-
-    expect(document.getElementById('team-a-score').textContent).toBe('0');
-    expect(document.getElementById('scoring-player-stats').textContent).toBe('0 PTS · 1 AST');
-    expect(document.getElementById('event-log-list').textContent).toContain('Alice +AST');
-  });
-
-  test('undo reverts the last stat and updates the scoreboard', () => {
+  test('tapping a quick button for a multi-player team opens a player picker', () => {
     const { document, localStorage } = loadApp({ storage: { hoops_players: players, hoops_current_game: activeGame() } });
 
-    click(document.querySelector('#active-players-list-a .player-chip'));
-    click(document.querySelector('#scoring-bar .action-btn[data-stat="3"]'));
+    click(quickBtn(document, 'A', '3'));
+
+    expect(document.getElementById('picker-overlay').classList.contains('hidden')).toBe(false);
+    const options = document.querySelectorAll('#picker-list .picker-btn');
+    expect(options).toHaveLength(2);
+    expect(options[0].textContent).toBe('Alice');
+    expect(options[1].textContent).toBe('Charlie');
+
+    click(options[0]);
+
+    expect(document.getElementById('picker-overlay').classList.contains('hidden')).toBe(true);
     expect(document.getElementById('team-a-score').textContent).toBe('3');
-
-    click(document.getElementById('undo-btn'));
-
-    expect(document.getElementById('team-a-score').textContent).toBe('0');
-    expect(document.getElementById('event-log-count').textContent).toBe('0');
-    expect(document.getElementById('undo-btn').disabled).toBe(true);
+    expect(document.getElementById('feed').textContent).toContain('+3');
+    expect(document.getElementById('feed').textContent).toContain('Alice');
 
     const stored = JSON.parse(localStorage.getItem('hoops_current_game'));
-    expect(stored.stats.p1.shots[3]).toBe(0);
+    expect(stored.stats.p1.shots[3]).toBe(1);
+  });
+
+  test('cancelling the player picker records nothing', () => {
+    const { document, localStorage } = loadApp({ storage: { hoops_players: players, hoops_current_game: activeGame() } });
+
+    click(quickBtn(document, 'A', '2'));
+    expect(document.getElementById('picker-overlay').classList.contains('hidden')).toBe(false);
+
+    click(document.getElementById('picker-cancel'));
+
+    expect(document.getElementById('picker-overlay').classList.contains('hidden')).toBe(true);
+    expect(document.getElementById('team-a-score').textContent).toBe('0');
+    const stored = JSON.parse(localStorage.getItem('hoops_current_game'));
     expect(stored.log).toHaveLength(0);
   });
 
-  test('undo is disabled and does nothing when the log is empty', () => {
+  test('a fresh shot shows contextual AST and +1 actions on its feed row', () => {
+    const { document } = loadApp({ storage: { hoops_players: players, hoops_current_game: activeGame() } });
+
+    click(quickBtn(document, 'B', '2'));
+
+    const feedItem = document.querySelector('#feed .feed-item');
+    expect(feedItem.querySelector('[data-action="and-one"]')).not.toBeNull();
+    // Team B only has one player, so there's no one to credit an assist to.
+    expect(feedItem.querySelector('[data-action="ast"]')).toBeNull();
+  });
+
+  test('tapping AST opens a teammate picker and resolves to a badge', () => {
     const { document, localStorage } = loadApp({ storage: { hoops_players: players, hoops_current_game: activeGame() } });
+
+    click(quickBtn(document, 'A', '3'));
+    click(document.querySelectorAll('#picker-list .picker-btn')[0]); // Alice scores
+
+    const astBtn = document.querySelector('#feed [data-action="ast"]');
+    expect(astBtn).not.toBeNull();
+    click(astBtn);
+
+    expect(document.getElementById('picker-overlay').classList.contains('hidden')).toBe(false);
+    const options = document.querySelectorAll('#picker-list .picker-btn');
+    expect(options).toHaveLength(1);
+    expect(options[0].textContent).toBe('Charlie');
+
+    click(options[0]);
+
+    expect(document.getElementById('picker-overlay').classList.contains('hidden')).toBe(true);
+    expect(document.getElementById('feed').textContent).toContain('AST Charlie');
+    expect(document.querySelector('#feed [data-action="ast"]')).toBeNull();
+
+    const stored = JSON.parse(localStorage.getItem('hoops_current_game'));
+    expect(stored.stats.p3.assists).toBe(1);
+    expect(stored.log).toHaveLength(2);
+  });
+
+  test('tapping +1 records an and-one for the scorer and shows a badge', () => {
+    const { document, localStorage } = loadApp({ storage: { hoops_players: players, hoops_current_game: activeGame() } });
+
+    click(quickBtn(document, 'A', '3'));
+    click(document.querySelectorAll('#picker-list .picker-btn')[0]); // Alice scores
+
+    click(document.querySelector('#feed [data-action="and-one"]'));
+
+    expect(document.getElementById('team-a-score').textContent).toBe('4');
+    expect(document.getElementById('feed').textContent).toContain('+1');
+    expect(document.querySelector('#feed [data-action="and-one"]')).toBeNull();
+
+    const stored = JSON.parse(localStorage.getItem('hoops_current_game'));
+    expect(stored.stats.p1.shots[1]).toBe(1);
+    expect(stored.log).toHaveLength(2);
+  });
+
+  test('undo asks for confirmation before reverting the last action', () => {
+    const { document, localStorage, confirms, setConfirmResult } = loadApp({
+      storage: { hoops_players: players, hoops_current_game: activeGame() },
+      confirmReturn: false,
+    });
+
+    click(quickBtn(document, 'B', '2'));
+    expect(document.getElementById('team-b-score').textContent).toBe('2');
+
+    click(document.getElementById('undo-btn'));
+
+    expect(confirms.some(c => c.toLowerCase().includes('undo'))).toBe(true);
+    expect(document.getElementById('team-b-score').textContent).toBe('2');
+    let stored = JSON.parse(localStorage.getItem('hoops_current_game'));
+    expect(stored.log).toHaveLength(1);
+
+    setConfirmResult(true);
+    click(document.getElementById('undo-btn'));
+
+    expect(document.getElementById('team-b-score').textContent).toBe('0');
+    expect(document.getElementById('undo-btn').disabled).toBe(true);
+    stored = JSON.parse(localStorage.getItem('hoops_current_game'));
+    expect(stored.log).toHaveLength(0);
+  });
+
+  test('undo is disabled and asks nothing when the log is empty', () => {
+    const { document, localStorage, confirms } = loadApp({ storage: { hoops_players: players, hoops_current_game: activeGame() } });
 
     expect(document.getElementById('undo-btn').disabled).toBe(true);
 
     click(document.getElementById('undo-btn'));
 
+    expect(confirms).toHaveLength(0);
     const stored = JSON.parse(localStorage.getItem('hoops_current_game'));
     expect(stored.log).toHaveLength(0);
   });

@@ -124,7 +124,13 @@
   let setupAssignments = {}; // playerId -> 'A' | 'B'
   let teamAName = 'Team A';
   let teamBName = 'Team B';
-  let selectedPlayerId = null;
+
+  // Migrate any in-progress game's log entries to have stable ids.
+  if (currentGame) {
+    currentGame.log.forEach(entry => {
+      if (!entry.id) entry.id = crypto.randomUUID();
+    });
+  }
 
   function renderPlay() {
     if (currentGame) {
@@ -203,7 +209,6 @@
       stats,
       log: [],
     };
-    selectedPlayerId = null;
     save(STORAGE.current, currentGame);
     renderPlay();
   });
@@ -224,100 +229,174 @@
     document.getElementById('team-b-name').textContent = currentGame.teams.B.name;
     document.getElementById('team-a-score').textContent = teamScore(currentGame.teams.A);
     document.getElementById('team-b-score').textContent = teamScore(currentGame.teams.B);
-    document.getElementById('team-a-heading').textContent = currentGame.teams.A.name;
-    document.getElementById('team-b-heading').textContent = currentGame.teams.B.name;
 
-    renderTeamChips('active-players-list-a', currentGame.teams.A.playerIds);
-    renderTeamChips('active-players-list-b', currentGame.teams.B.playerIds);
-    renderScoringBar();
-    renderEventLog();
-    syncPlayActivePadding();
+    renderFeed();
 
     document.getElementById('undo-btn').disabled = currentGame.log.length === 0;
   }
 
-  function syncPlayActivePadding() {
-    const bar = document.getElementById('scoring-bar');
-    document.documentElement.style.setProperty('--scoring-bar-height', `${bar.offsetHeight}px`);
+  function teamKeyForPlayer(playerId) {
+    return currentGame.teams.A.playerIds.includes(playerId) ? 'A' : 'B';
   }
 
-  window.addEventListener('resize', () => {
-    if (currentGame) syncPlayActivePadding();
-  });
+  // Renders the play-by-play feed, newest first. Assist / and-one entries are
+  // merged into the row of the shot they're contextual to instead of getting
+  // their own row.
+  function renderFeed() {
+    const feed = document.getElementById('feed');
+    const log = currentGame.log;
 
-  function renderEventLog() {
-    document.getElementById('event-log-count').textContent = currentGame.log.length;
-    document.getElementById('event-log-list').innerHTML = renderEventLogItems(currentGame.log);
-  }
-
-  function renderTeamChips(containerId, playerIds) {
-    const list = document.getElementById(containerId);
-    list.innerHTML = '';
-    playerIds.forEach(id => {
-      const player = players.find(p => p.id === id);
-      const stat = currentGame.stats[id];
-      const name = player ? player.name : 'Unknown';
-
-      const chip = document.createElement('button');
-      chip.type = 'button';
-      chip.className = 'player-chip' + (selectedPlayerId === id ? ' selected' : '');
-      chip.innerHTML = `
-        <div class="player-chip-name">${escapeHtml(name)}</div>
-        <div class="player-chip-stats">${playerPoints(stat)} PTS · ${stat.assists} AST</div>
-      `;
-      chip.addEventListener('click', () => {
-        selectedPlayerId = id;
-        renderActiveGame();
-      });
-      list.appendChild(chip);
-    });
-  }
-
-  function renderScoringBar() {
-    const bar = document.getElementById('scoring-bar');
-    const stat = currentGame.stats[selectedPlayerId];
-    const player = players.find(p => p.id === selectedPlayerId);
-
-    if (!stat || !player) {
-      bar.classList.add('empty');
-      document.getElementById('scoring-player-name').textContent = 'Tap a player to record stats';
-      document.getElementById('scoring-player-stats').textContent = '';
-      document.getElementById('scoring-player-breakdown').textContent = '';
-      bar.querySelectorAll('.action-btn').forEach(btn => { btn.disabled = true; });
+    if (log.length === 0) {
+      feed.innerHTML = '<p class="empty">No plays yet. Tap +2 / +3 to get started.</p>';
       return;
     }
 
-    bar.classList.remove('empty');
-    document.getElementById('scoring-player-name').textContent = player.name;
-    document.getElementById('scoring-player-stats').textContent = `${playerPoints(stat)} PTS · ${stat.assists} AST`;
-    document.getElementById('scoring-player-breakdown').textContent = `1PT ×${stat.shots[1]} · 2PT ×${stat.shots[2]} · 3PT ×${stat.shots[3]}`;
-    bar.querySelectorAll('.action-btn').forEach(btn => { btn.disabled = false; });
+    const shotIds = log
+      .filter(e => (e.stat === '1' || e.stat === '2' || e.stat === '3') && !e.andOneFor)
+      .map(e => e.id);
+    const recentShotIds = new Set(shotIds.slice(-2));
+
+    const rows = [];
+    log.slice().reverse().forEach(entry => {
+      if (entry.assistFor || entry.andOneFor) return;
+
+      const time = formatTime(new Date(entry.at));
+
+      if (entry.stat === 'assists') {
+        rows.push(`
+          <div class="feed-item">
+            <span class="feed-time">${time}</span>
+            <span class="feed-desc">${escapeHtml(entry.playerName)} +AST</span>
+          </div>
+        `);
+        return;
+      }
+
+      const assist = log.find(e => e.assistFor === entry.id);
+      const andOne = log.find(e => e.andOneFor === entry.id);
+      const isRecent = recentShotIds.has(entry.id);
+      const teammates = currentGame.teams[teamKeyForPlayer(entry.playerId)].playerIds.filter(id => id !== entry.playerId);
+
+      let actions = '';
+      if (assist) {
+        actions += `<span class="feed-badge">AST ${escapeHtml(assist.playerName)}</span>`;
+      } else if (isRecent && teammates.length > 0) {
+        actions += `<button type="button" class="feed-chip" data-action="ast" data-entry="${entry.id}">AST</button>`;
+      }
+      if (andOne) {
+        actions += `<span class="feed-badge">+1</span>`;
+      } else if (isRecent) {
+        actions += `<button type="button" class="feed-chip" data-action="and-one" data-entry="${entry.id}">+1</button>`;
+      }
+
+      rows.push(`
+        <div class="feed-item">
+          <span class="feed-time">${time}</span>
+          <span class="feed-desc"><strong>+${entry.stat}</strong> ${escapeHtml(entry.playerName)}</span>
+          <span class="feed-actions">${actions}</span>
+        </div>
+      `);
+    });
+
+    feed.innerHTML = rows.join('');
+
+    feed.querySelectorAll('[data-action="ast"]').forEach(btn => {
+      btn.addEventListener('click', () => handleAssist(btn.dataset.entry));
+    });
+    feed.querySelectorAll('[data-action="and-one"]').forEach(btn => {
+      btn.addEventListener('click', () => recordAndOne(btn.dataset.entry));
+    });
   }
 
-  document.querySelectorAll('#scoring-bar .action-btn').forEach(btn => {
+  function playerOptions(playerIds) {
+    return playerIds.map(id => {
+      const player = players.find(p => p.id === id);
+      return { id, label: player ? player.name : 'Unknown' };
+    });
+  }
+
+  function openPicker(title, options, onSelect) {
+    document.getElementById('picker-title').textContent = title;
+    const list = document.getElementById('picker-list');
+    list.innerHTML = '';
+    options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'picker-btn';
+      btn.textContent = opt.label;
+      btn.addEventListener('click', () => {
+        closePicker();
+        onSelect(opt.id);
+      });
+      list.appendChild(btn);
+    });
+    document.getElementById('picker-overlay').classList.remove('hidden');
+  }
+
+  function closePicker() {
+    document.getElementById('picker-overlay').classList.add('hidden');
+  }
+
+  document.getElementById('picker-cancel').addEventListener('click', closePicker);
+  document.getElementById('picker-overlay').addEventListener('click', (e) => {
+    if (e.target.id === 'picker-overlay') closePicker();
+  });
+
+  document.querySelectorAll('.quick-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      if (!selectedPlayerId) return;
-      recordStat(selectedPlayerId, btn.dataset.stat);
+      const teamKey = btn.dataset.team;
+      const points = btn.dataset.points;
+      const playerIds = currentGame.teams[teamKey].playerIds;
+
+      if (playerIds.length === 1) {
+        recordStat(playerIds[0], points);
+        return;
+      }
+
+      openPicker(`Who scored +${points}?`, playerOptions(playerIds), (playerId) => recordStat(playerId, points));
     });
   });
+
+  function handleAssist(entryId) {
+    const entry = currentGame.log.find(e => e.id === entryId);
+    if (!entry) return;
+    const teammates = currentGame.teams[teamKeyForPlayer(entry.playerId)].playerIds.filter(id => id !== entry.playerId);
+    openPicker(`Who assisted ${entry.playerName}?`, playerOptions(teammates), (assistPlayerId) => {
+      recordStat(assistPlayerId, 'assists', { assistFor: entry.id });
+    });
+  }
+
+  function recordAndOne(entryId) {
+    const entry = currentGame.log.find(e => e.id === entryId);
+    if (!entry) return;
+    recordStat(entry.playerId, '1', { andOneFor: entry.id });
+  }
 
   function adjustStat(stat, key, delta) {
     if (key === 'assists') stat.assists += delta;
     else stat.shots[key] += delta;
   }
 
-  function recordStat(playerId, key) {
+  function recordStat(playerId, key, extra = {}) {
     const stat = currentGame.stats[playerId];
     adjustStat(stat, key, 1);
     const player = players.find(p => p.id === playerId);
-    currentGame.log.push({ playerId, playerName: player ? player.name : 'Unknown', stat: key, at: new Date().toISOString() });
+    currentGame.log.push({
+      id: crypto.randomUUID(),
+      playerId,
+      playerName: player ? player.name : 'Unknown',
+      stat: key,
+      at: new Date().toISOString(),
+      ...extra,
+    });
     save(STORAGE.current, currentGame);
     renderActiveGame();
   }
 
   document.getElementById('undo-btn').addEventListener('click', () => {
+    if (currentGame.log.length === 0) return;
+    if (!confirm('Undo the last action? This cannot be redone.')) return;
     const last = currentGame.log.pop();
-    if (!last) return;
     adjustStat(currentGame.stats[last.playerId], last.stat, -1);
     save(STORAGE.current, currentGame);
     renderActiveGame();
@@ -356,7 +435,6 @@
     games.unshift(game);
     save(STORAGE.games, games);
     currentGame = null;
-    selectedPlayerId = null;
     localStorage.removeItem(STORAGE.current);
     renderPlay();
     renderHistory();
@@ -365,7 +443,6 @@
   document.getElementById('discard-game-btn').addEventListener('click', () => {
     if (!confirm('Discard this game without saving?')) return;
     currentGame = null;
-    selectedPlayerId = null;
     localStorage.removeItem(STORAGE.current);
     renderPlay();
   });

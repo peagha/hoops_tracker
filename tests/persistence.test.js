@@ -26,8 +26,7 @@ describe('Persistence across reloads', () => {
   test('an in-progress game is restored after reload', () => {
     const first = loadApp({ storage: { hoops_players: players, hoops_current_game: activeGame() } });
 
-    click(first.document.querySelector('#active-players-list-a .player-chip'));
-    click(first.document.querySelector('#scoring-bar .action-btn[data-stat="3"]'));
+    click(first.document.querySelector('.quick-btn[data-team="A"][data-points="3"]'));
 
     const savedGame = JSON.parse(first.localStorage.getItem('hoops_current_game'));
 
@@ -36,7 +35,7 @@ describe('Persistence across reloads', () => {
 
     expect(second.document.getElementById('play-active').classList.contains('hidden')).toBe(false);
     expect(second.document.getElementById('team-a-score').textContent).toBe('3');
-    expect(second.document.getElementById('event-log-count').textContent).toBe('1');
+    expect(second.document.getElementById('feed').textContent).toContain('Alice');
     expect(second.document.getElementById('undo-btn').disabled).toBe(false);
   });
 

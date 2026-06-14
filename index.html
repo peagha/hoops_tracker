@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#111827">
 <title>Hoops Tracker</title>
-<link rel="stylesheet" href="style.css?v=2026.06.13-1953">
+<link rel="stylesheet" href="style.css?v=2026.06.14-0950">
 </head>
 <body>
 <header class="app-header">
@@ -39,39 +39,32 @@
         <div class="scoreboard-score" id="team-b-score">0</div>
       </div>
     </div>
+    <div class="quick-actions">
+      <div class="quick-team">
+        <button type="button" class="quick-btn" data-team="A" data-points="3">+3</button>
+        <button type="button" class="quick-btn" data-team="A" data-points="2">+2</button>
+      </div>
+      <div class="quick-team">
+        <button type="button" class="quick-btn" data-team="B" data-points="3">+3</button>
+        <button type="button" class="quick-btn" data-team="B" data-points="2">+2</button>
+      </div>
+    </div>
+    <div id="feed" class="feed"></div>
     <div class="active-toolbar">
       <button id="undo-btn" class="btn-secondary">↩ Undo</button>
       <button id="end-game-btn" class="btn-primary">End Game</button>
     </div>
-    <div class="team-section">
-      <h3 class="team-heading" id="team-a-heading"></h3>
-      <div id="active-players-list-a" class="chip-grid"></div>
-    </div>
-    <div class="team-section">
-      <h3 class="team-heading" id="team-b-heading"></h3>
-      <div id="active-players-list-b" class="chip-grid"></div>
-    </div>
-    <details class="event-log">
-      <summary>Event Log (<span id="event-log-count">0</span>)</summary>
-      <div id="event-log-list" class="event-log-list"></div>
-    </details>
     <button id="discard-game-btn" class="btn-text danger">Discard game</button>
-
-    <div id="scoring-bar" class="scoring-bar">
-      <div class="scoring-bar-header">
-        <span id="scoring-player-name">Tap a player to record stats</span>
-        <span id="scoring-player-stats"></span>
-      </div>
-      <div class="scoring-bar-breakdown" id="scoring-player-breakdown"></div>
-      <div class="scoring-bar-actions">
-        <button class="action-btn" data-stat="1">+1</button>
-        <button class="action-btn" data-stat="2">+2</button>
-        <button class="action-btn" data-stat="3">+3</button>
-        <button class="action-btn assist" data-stat="assists">+AST</button>
-      </div>
-    </div>
   </div>
 </main>
+
+<div id="picker-overlay" class="picker-overlay hidden">
+  <div class="picker-sheet">
+    <div class="picker-title" id="picker-title"></div>
+    <div id="picker-list" class="picker-list"></div>
+    <button type="button" id="picker-cancel" class="btn-secondary">Cancel</button>
+  </div>
+</div>
 
 <main id="view-players" class="view">
   <h2>Players</h2>
@@ -113,7 +106,7 @@
   <button data-view="menu" class="nav-btn">☰<span>Menu</span></button>
 </nav>
 
-<script>window.APP_VERSION = "2026.06.13-1953";</script>
-<script src="app.js?v=2026.06.13-1953"></script>
+<script>window.APP_VERSION = "2026.06.14-0950";</script>
+<script src="app.js?v=2026.06.14-0950"></script>
 </body>
 </html>

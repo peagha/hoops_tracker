@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "hoops-tracker",
+      "runtimeExecutable": "bunx",
+      "runtimeArgs": ["serve", "-l", "4173", "."],
+      "port": 4173
+    }
+  ]
+}

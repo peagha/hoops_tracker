@@ -292,28 +292,10 @@ body {
   font-weight: 700;
 }
 
-.team-heading {
-  font-size: 0.9rem;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 16px 0 8px;
-}
-
-#play-active {
-  padding-bottom: calc(var(--scoring-bar-height, 0px) + var(--nav-height) - 16px + env(safe-area-inset-bottom));
-}
-
 .active-toolbar {
   display: flex;
   gap: 8px;
-  margin-bottom: 12px;
-  position: sticky;
-  top: 0;
-  background: var(--bg);
-  padding-top: 4px;
-  padding-bottom: 4px;
-  z-index: 5;
+  margin-top: 12px;
 }
 
 .active-toolbar .btn-secondary {
@@ -325,88 +307,159 @@ body {
   margin-top: 0;
 }
 
-.chip-grid {
+/* Quick score actions */
+.quick-actions {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.quick-team {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
-.player-chip {
+.quick-btn {
+  width: 100%;
+  aspect-ratio: 1 / 1;
   background: var(--card);
-  border: 2px solid transparent;
-  border-radius: 12px;
-  padding: 10px 12px;
-  text-align: left;
+  color: var(--text);
+  border: none;
+  border-radius: 16px;
+  font-size: 2.2rem;
+  font-weight: 800;
   cursor: pointer;
   touch-action: manipulation;
-  color: var(--text);
-  font-family: inherit;
 }
 
-.player-chip.selected {
-  border-color: var(--accent);
-  background: var(--card-alt);
+.quick-btn:active {
+  background: var(--accent-dim);
 }
 
-.player-chip-name {
-  font-size: 1rem;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.player-chip-stats {
-  color: var(--accent);
-  font-weight: 600;
-  font-size: 0.85rem;
-}
-
-/* Scoring bar */
-.scoring-bar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: calc(var(--nav-height) + env(safe-area-inset-bottom));
-  background: var(--card);
-  border-top: 1px solid var(--card-alt);
-  padding: 10px 16px max(10px, env(safe-area-inset-bottom));
-  z-index: 6;
-}
-
-.scoring-bar-header {
+/* Play feed */
+.feed {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 4px;
-}
-
-#scoring-player-name {
-  font-size: 1.05rem;
-  font-weight: 700;
-}
-
-#scoring-player-stats {
-  color: var(--accent);
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
-.scoring-bar-breakdown {
-  color: var(--muted);
-  font-size: 0.8rem;
-  margin-bottom: 10px;
-  min-height: 1em;
-}
-
-.scoring-bar-actions {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  flex-direction: column;
   gap: 8px;
 }
 
-.scoring-bar.empty .scoring-bar-actions .action-btn {
-  opacity: 0.4;
+.feed-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--card);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.feed-time {
+  color: var(--muted);
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.feed-desc {
+  flex: 1;
+  min-width: 0;
+  font-size: 1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feed-desc strong {
+  color: var(--accent);
+  margin-right: 4px;
+}
+
+.feed-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.feed-chip {
+  background: var(--card-alt);
+  color: var(--text);
+  border: none;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.feed-chip:active {
+  background: var(--accent-dim);
+}
+
+.feed-badge {
+  background: var(--accent);
+  color: #1a1a1a;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Player picker */
+.picker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 20;
+}
+
+.picker-overlay.hidden {
+  display: none;
+}
+
+.picker-sheet {
+  width: 100%;
+  max-width: 480px;
+  background: var(--card);
+  border-radius: 16px 16px 0 0;
+  padding: 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+.picker-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.picker-btn {
+  width: 100%;
+  text-align: left;
+  background: var(--card-alt);
+  color: var(--text);
+  border: none;
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.picker-btn:active {
+  background: var(--accent-dim);
 }
 
 /* Menu */
@@ -474,26 +527,6 @@ body {
   background: var(--card-alt);
   padding: 8px 12px;
   margin-top: 8px;
-}
-
-.action-btn {
-  background: var(--card-alt);
-  color: var(--text);
-  border: none;
-  border-radius: 10px;
-  padding: 14px 0;
-  font-size: 1.05rem;
-  font-weight: 700;
-  cursor: pointer;
-  touch-action: manipulation;
-}
-
-.action-btn:active {
-  background: var(--accent-dim);
-}
-
-.action-btn.assist {
-  font-size: 0.85rem;
 }
 
 /* History */
@@ -603,7 +636,7 @@ body {
   }
 
   .bottom-nav,
-  .scoring-bar {
+  .picker-overlay {
     left: 50%;
     right: auto;
     width: 480px;
