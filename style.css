@@ -338,17 +338,17 @@ body {
 .quick-team {
   display: flex;
   gap: 8px;
+  flex: 1;
 }
 
 .quick-btn {
-  width: 60px;
-  height: 60px;
+  flex: 1;
   aspect-ratio: 1 / 1;
   background: var(--card);
   color: var(--text);
   border: none;
   border-radius: 12px;
-  font-size: 1.4rem;
+  font-size: 1.8rem;
   font-weight: 800;
   cursor: pointer;
   touch-action: manipulation;
@@ -425,6 +425,17 @@ body {
   font-size: 0.8rem;
   font-weight: 700;
   white-space: nowrap;
+}
+
+.feed-badge.removable {
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.feed-badge.removable:active {
+  background: var(--accent-dim);
 }
 
 /* Player picker */

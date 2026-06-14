@@ -131,6 +131,32 @@ describe('Scoring an active game', () => {
     expect(stored.undoStack.map(a => a.type)).toEqual(['shot', 'assist']);
   });
 
+  test('tapping a resolved AST badge removes the assist credit after confirmation', () => {
+    const { document, localStorage } = loadApp({
+      storage: { hoops_players: players, hoops_current_game: activeGame() },
+      confirmReturn: true,
+    });
+
+    click(quickBtn(document, 'A', '3'));
+    click(document.querySelectorAll('#picker-list .picker-btn')[0]); // Alice scores
+    click(document.querySelector('#feed [data-action="ast"]'));
+    click(document.querySelectorAll('#picker-list .picker-btn')[0]); // Charlie assists
+
+    const removeBtn = document.querySelector('#feed [data-action="remove-ast"]');
+    expect(removeBtn).not.toBeNull();
+    expect(removeBtn.textContent).toContain('AST Charlie');
+
+    click(removeBtn);
+
+    expect(document.getElementById('feed').textContent).not.toContain('AST Charlie');
+    expect(document.querySelector('#feed [data-action="ast"]')).not.toBeNull();
+
+    const stored = JSON.parse(localStorage.getItem('hoops_current_game'));
+    expect(stored.stats.p3.assists).toBe(0);
+    expect(stored.log[0].assist).toBeUndefined();
+    expect(stored.undoStack.map(a => a.type)).toEqual(['shot']);
+  });
+
   test('tapping +1 records an and-one for the scorer and shows a badge', () => {
     const { document, localStorage } = loadApp({ storage: { hoops_players: players, hoops_current_game: activeGame() } });
 
@@ -148,6 +174,31 @@ describe('Scoring an active game', () => {
     expect(stored.log).toHaveLength(1);
     expect(stored.log[0].andOne).toBe(true);
     expect(stored.undoStack.map(a => a.type)).toEqual(['shot', 'andOne']);
+  });
+
+  test('tapping a resolved +1 badge removes the and-one after confirmation', () => {
+    const { document, localStorage } = loadApp({
+      storage: { hoops_players: players, hoops_current_game: activeGame() },
+      confirmReturn: true,
+    });
+
+    click(quickBtn(document, 'A', '3'));
+    click(document.querySelectorAll('#picker-list .picker-btn')[0]); // Alice scores
+    click(document.querySelector('#feed [data-action="and-one"]'));
+
+    expect(document.getElementById('team-a-score').textContent).toBe('4');
+
+    const removeBtn = document.querySelector('#feed [data-action="remove-and-one"]');
+    expect(removeBtn).not.toBeNull();
+    click(removeBtn);
+
+    expect(document.getElementById('team-a-score').textContent).toBe('3');
+    expect(document.querySelector('#feed [data-action="and-one"]')).not.toBeNull();
+
+    const stored = JSON.parse(localStorage.getItem('hoops_current_game'));
+    expect(stored.stats.p1.shots[1]).toBe(0);
+    expect(stored.log[0].andOne).toBeUndefined();
+    expect(stored.undoStack.map(a => a.type)).toEqual(['shot']);
   });
 
   test('undo asks for confirmation before reverting the last action', () => {

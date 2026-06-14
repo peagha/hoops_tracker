@@ -262,12 +262,12 @@
 
       let actions = '';
       if (entry.assist) {
-        actions += `<span class="feed-badge">AST ${escapeHtml(entry.assist.playerName)}</span>`;
+        actions += `<button type="button" class="feed-badge removable" data-action="remove-ast" data-entry="${entry.id}">AST ${escapeHtml(entry.assist.playerName)}</button>`;
       } else if (isRecent && teammates.length > 0) {
         actions += `<button type="button" class="feed-chip" data-action="ast" data-entry="${entry.id}">AST</button>`;
       }
       if (entry.andOne) {
-        actions += `<span class="feed-badge">+1</span>`;
+        actions += `<button type="button" class="feed-badge removable" data-action="remove-and-one" data-entry="${entry.id}">+1</button>`;
       } else if (isRecent) {
         actions += `<button type="button" class="feed-chip" data-action="and-one" data-entry="${entry.id}">+1</button>`;
       }
@@ -286,8 +286,14 @@
     feed.querySelectorAll('[data-action="ast"]').forEach(btn => {
       btn.addEventListener('click', () => handleAssist(btn.dataset.entry));
     });
+    feed.querySelectorAll('[data-action="remove-ast"]').forEach(btn => {
+      btn.addEventListener('click', () => removeAssist(btn.dataset.entry));
+    });
     feed.querySelectorAll('[data-action="and-one"]').forEach(btn => {
       btn.addEventListener('click', () => recordAndOne(btn.dataset.entry));
+    });
+    feed.querySelectorAll('[data-action="remove-and-one"]').forEach(btn => {
+      btn.addEventListener('click', () => removeAndOne(btn.dataset.entry));
     });
   }
 
@@ -376,12 +382,34 @@
     renderActiveGame();
   }
 
+  function removeAssist(entryId) {
+    const entry = currentGame.log.find(e => e.id === entryId);
+    if (!entry || !entry.assist) return;
+    if (!confirm(`Remove assist credit for ${entry.assist.playerName}?`)) return;
+    currentGame.stats[entry.assist.playerId].assists -= 1;
+    delete entry.assist;
+    currentGame.undoStack = currentGame.undoStack.filter(a => !(a.type === 'assist' && a.entryId === entryId));
+    save(STORAGE.current, currentGame);
+    renderActiveGame();
+  }
+
   function recordAndOne(entryId) {
     const entry = currentGame.log.find(e => e.id === entryId);
     if (!entry) return;
     entry.andOne = true;
     currentGame.stats[entry.playerId].shots[1] += 1;
     currentGame.undoStack.push({ type: 'andOne', entryId });
+    save(STORAGE.current, currentGame);
+    renderActiveGame();
+  }
+
+  function removeAndOne(entryId) {
+    const entry = currentGame.log.find(e => e.id === entryId);
+    if (!entry || !entry.andOne) return;
+    if (!confirm(`Remove the +1 for ${entry.playerName}?`)) return;
+    currentGame.stats[entry.playerId].shots[1] -= 1;
+    delete entry.andOne;
+    currentGame.undoStack = currentGame.undoStack.filter(a => !(a.type === 'andOne' && a.entryId === entryId));
     save(STORAGE.current, currentGame);
     renderActiveGame();
   }
