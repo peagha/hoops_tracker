@@ -47,8 +47,10 @@
   }
 
   function describeLogEntry(entry) {
-    const label = entry.stat === 'assists' ? 'AST' : `${entry.stat}PT`;
-    return `${entry.playerName} +${label}`;
+    let desc = `${entry.playerName} +${entry.stat}PT`;
+    if (entry.assist) desc += ` (AST ${entry.assist.playerName})`;
+    if (entry.andOne) desc += ' +1';
+    return desc;
   }
 
   function renderEventLogItems(events) {
@@ -125,11 +127,10 @@
   let teamAName = 'Team A';
   let teamBName = 'Team B';
 
-  // Migrate any in-progress game's log entries to have stable ids.
-  if (currentGame) {
-    currentGame.log.forEach(entry => {
-      if (!entry.id) entry.id = crypto.randomUUID();
-    });
+  // Discard any in-progress game saved under the old log/undo schema.
+  if (currentGame && !currentGame.undoStack) {
+    currentGame = null;
+    localStorage.removeItem(STORAGE.current);
   }
 
   function renderPlay() {
@@ -208,6 +209,7 @@
       },
       stats,
       log: [],
+      undoStack: [],
     };
     save(STORAGE.current, currentGame);
     renderPlay();
@@ -232,16 +234,16 @@
 
     renderFeed();
 
-    document.getElementById('undo-btn').disabled = currentGame.log.length === 0;
+    document.getElementById('undo-btn').disabled = currentGame.undoStack.length === 0;
   }
 
   function teamKeyForPlayer(playerId) {
     return currentGame.teams.A.playerIds.includes(playerId) ? 'A' : 'B';
   }
 
-  // Renders the play-by-play feed, newest first. Assist / and-one entries are
-  // merged into the row of the shot they're contextual to instead of getting
-  // their own row.
+  // Renders the play-by-play feed, newest first. Assist / and-one info is
+  // stored directly on the shot entry (entry.assist / entry.andOne) and
+  // rendered as part of that entry's row.
   function renderFeed() {
     const feed = document.getElementById('feed');
     const log = currentGame.log;
@@ -251,51 +253,32 @@
       return;
     }
 
-    const shotIds = log
-      .filter(e => (e.stat === '1' || e.stat === '2' || e.stat === '3') && !e.andOneFor)
-      .map(e => e.id);
-    const recentShotIds = new Set(shotIds.slice(-2));
+    const recentIds = new Set(log.slice(-2).map(e => e.id));
 
-    const rows = [];
-    log.slice().reverse().forEach(entry => {
-      if (entry.assistFor || entry.andOneFor) return;
-
+    const rows = log.slice().reverse().map(entry => {
       const time = formatTime(new Date(entry.at));
-
-      if (entry.stat === 'assists') {
-        rows.push(`
-          <div class="feed-item">
-            <span class="feed-time">${time}</span>
-            <span class="feed-desc">${escapeHtml(entry.playerName)} +AST</span>
-          </div>
-        `);
-        return;
-      }
-
-      const assist = log.find(e => e.assistFor === entry.id);
-      const andOne = log.find(e => e.andOneFor === entry.id);
-      const isRecent = recentShotIds.has(entry.id);
+      const isRecent = recentIds.has(entry.id);
       const teammates = currentGame.teams[teamKeyForPlayer(entry.playerId)].playerIds.filter(id => id !== entry.playerId);
 
       let actions = '';
-      if (assist) {
-        actions += `<span class="feed-badge">AST ${escapeHtml(assist.playerName)}</span>`;
+      if (entry.assist) {
+        actions += `<span class="feed-badge">AST ${escapeHtml(entry.assist.playerName)}</span>`;
       } else if (isRecent && teammates.length > 0) {
         actions += `<button type="button" class="feed-chip" data-action="ast" data-entry="${entry.id}">AST</button>`;
       }
-      if (andOne) {
+      if (entry.andOne) {
         actions += `<span class="feed-badge">+1</span>`;
       } else if (isRecent) {
         actions += `<button type="button" class="feed-chip" data-action="and-one" data-entry="${entry.id}">+1</button>`;
       }
 
-      rows.push(`
+      return `
         <div class="feed-item">
           <span class="feed-time">${time}</span>
           <span class="feed-desc"><strong>+${entry.stat}</strong> ${escapeHtml(entry.playerName)}</span>
           <span class="feed-actions">${actions}</span>
         </div>
-      `);
+      `;
     });
 
     feed.innerHTML = rows.join('');
@@ -362,42 +345,65 @@
     if (!entry) return;
     const teammates = currentGame.teams[teamKeyForPlayer(entry.playerId)].playerIds.filter(id => id !== entry.playerId);
     openPicker(`Who assisted ${entry.playerName}?`, playerOptions(teammates), (assistPlayerId) => {
-      recordStat(assistPlayerId, 'assists', { assistFor: entry.id });
+      recordAssist(entry.id, assistPlayerId);
     });
+  }
+
+  function recordStat(playerId, points) {
+    currentGame.stats[playerId].shots[points] += 1;
+    const player = players.find(p => p.id === playerId);
+    const entry = {
+      id: crypto.randomUUID(),
+      playerId,
+      playerName: player ? player.name : 'Unknown',
+      stat: points,
+      at: new Date().toISOString(),
+    };
+    currentGame.log.push(entry);
+    currentGame.undoStack.push({ type: 'shot', entryId: entry.id });
+    save(STORAGE.current, currentGame);
+    renderActiveGame();
+  }
+
+  function recordAssist(entryId, assistPlayerId) {
+    const entry = currentGame.log.find(e => e.id === entryId);
+    if (!entry) return;
+    const player = players.find(p => p.id === assistPlayerId);
+    entry.assist = { playerId: assistPlayerId, playerName: player ? player.name : 'Unknown' };
+    currentGame.stats[assistPlayerId].assists += 1;
+    currentGame.undoStack.push({ type: 'assist', entryId });
+    save(STORAGE.current, currentGame);
+    renderActiveGame();
   }
 
   function recordAndOne(entryId) {
     const entry = currentGame.log.find(e => e.id === entryId);
     if (!entry) return;
-    recordStat(entry.playerId, '1', { andOneFor: entry.id });
-  }
-
-  function adjustStat(stat, key, delta) {
-    if (key === 'assists') stat.assists += delta;
-    else stat.shots[key] += delta;
-  }
-
-  function recordStat(playerId, key, extra = {}) {
-    const stat = currentGame.stats[playerId];
-    adjustStat(stat, key, 1);
-    const player = players.find(p => p.id === playerId);
-    currentGame.log.push({
-      id: crypto.randomUUID(),
-      playerId,
-      playerName: player ? player.name : 'Unknown',
-      stat: key,
-      at: new Date().toISOString(),
-      ...extra,
-    });
+    entry.andOne = true;
+    currentGame.stats[entry.playerId].shots[1] += 1;
+    currentGame.undoStack.push({ type: 'andOne', entryId });
     save(STORAGE.current, currentGame);
     renderActiveGame();
   }
 
   document.getElementById('undo-btn').addEventListener('click', () => {
-    if (currentGame.log.length === 0) return;
+    if (currentGame.undoStack.length === 0) return;
     if (!confirm('Undo the last action? This cannot be redone.')) return;
-    const last = currentGame.log.pop();
-    adjustStat(currentGame.stats[last.playerId], last.stat, -1);
+
+    const action = currentGame.undoStack.pop();
+    const entry = currentGame.log.find(e => e.id === action.entryId);
+
+    if (action.type === 'shot') {
+      currentGame.stats[entry.playerId].shots[entry.stat] -= 1;
+      currentGame.log = currentGame.log.filter(e => e.id !== entry.id);
+    } else if (action.type === 'assist') {
+      currentGame.stats[entry.assist.playerId].assists -= 1;
+      delete entry.assist;
+    } else if (action.type === 'andOne') {
+      currentGame.stats[entry.playerId].shots[1] -= 1;
+      delete entry.andOne;
+    }
+
     save(STORAGE.current, currentGame);
     renderActiveGame();
   });
@@ -593,6 +599,17 @@
 
   // ---------- Menu ----------
   document.getElementById('app-version').textContent = window.APP_VERSION || 'dev';
+
+  document.getElementById('reset-app-btn').addEventListener('click', () => {
+    if (!confirm('Delete all players, game history, and any in-progress game? This cannot be undone.')) return;
+    localStorage.clear();
+    players = [];
+    games = [];
+    currentGame = null;
+    renderPlayers();
+    renderPlay();
+    renderHistory();
+  });
 
   // ---------- Init ----------
   renderPlayers();

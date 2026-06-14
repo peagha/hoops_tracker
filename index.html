@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#111827">
 <title>Hoops Tracker</title>
-<link rel="stylesheet" href="style.css?v=2026.06.14-0950">
+<link rel="stylesheet" href="style.css?v=2026.06.14-1020">
 </head>
 <body>
 <header class="app-header">
@@ -49,12 +49,14 @@
         <button type="button" class="quick-btn" data-team="B" data-points="2">+2</button>
       </div>
     </div>
-    <div id="feed" class="feed"></div>
+    <div id="feed-scroll" class="feed-scroll">
+      <div id="feed" class="feed"></div>
+      <button id="discard-game-btn" class="btn-text danger">Discard game</button>
+    </div>
     <div class="active-toolbar">
       <button id="undo-btn" class="btn-secondary">↩ Undo</button>
       <button id="end-game-btn" class="btn-primary">End Game</button>
     </div>
-    <button id="discard-game-btn" class="btn-text danger">Discard game</button>
   </div>
 </main>
 
@@ -94,6 +96,12 @@
   </section>
 
   <section class="menu-section">
+    <h3 class="menu-section-heading">Danger Zone</h3>
+    <p class="muted">Erase all players, game history, and any in-progress game from this device. This cannot be undone.</p>
+    <button id="reset-app-btn" class="btn-text danger">Delete All Data</button>
+  </section>
+
+  <section class="menu-section">
     <h3 class="menu-section-heading">Version</h3>
     <p class="muted">Build <span id="app-version"></span></p>
   </section>
@@ -106,7 +114,7 @@
   <button data-view="menu" class="nav-btn">☰<span>Menu</span></button>
 </nav>
 
-<script>window.APP_VERSION = "2026.06.14-0950";</script>
-<script src="app.js?v=2026.06.14-0950"></script>
+<script>window.APP_VERSION = "2026.06.14-1020";</script>
+<script src="app.js?v=2026.06.14-1020"></script>
 </body>
 </html>

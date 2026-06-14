@@ -251,7 +251,17 @@ body {
   color: #1a1a1a;
 }
 
-/* Active game */
+/* Active game: full-screen overlay while a game is in progress */
+#play-active {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  padding: max(12px, env(safe-area-inset-top)) 16px 0;
+}
+
 .scoreboard {
   display: flex;
   align-items: center;
@@ -261,6 +271,7 @@ body {
   border-radius: 14px;
   padding: 14px;
   margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
 .scoreboard-team {
@@ -292,10 +303,18 @@ body {
   font-weight: 700;
 }
 
+.feed-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
 .active-toolbar {
   display: flex;
   gap: 8px;
-  margin-top: 12px;
+  padding: 12px 0;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  flex-shrink: 0;
 }
 
 .active-toolbar .btn-secondary {
@@ -309,26 +328,26 @@ body {
 
 /* Quick score actions */
 .quick-actions {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
   gap: 12px;
   margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
 .quick-team {
+  flex: 1;
   display: flex;
-  flex-direction: column;
   gap: 8px;
 }
 
 .quick-btn {
-  width: 100%;
-  aspect-ratio: 1 / 1;
+  flex: 1;
+  height: 60px;
   background: var(--card);
   color: var(--text);
   border: none;
-  border-radius: 16px;
-  font-size: 2.2rem;
+  border-radius: 12px;
+  font-size: 1.4rem;
   font-weight: 800;
   cursor: pointer;
   touch-action: manipulation;
@@ -415,7 +434,7 @@ body {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  z-index: 20;
+  z-index: 40;
 }
 
 .picker-overlay.hidden {
@@ -636,7 +655,8 @@ body {
   }
 
   .bottom-nav,
-  .picker-overlay {
+  .picker-overlay,
+  #play-active {
     left: 50%;
     right: auto;
     width: 480px;

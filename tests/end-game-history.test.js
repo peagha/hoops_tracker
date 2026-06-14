@@ -15,16 +15,15 @@ function activeGameWithScore() {
       B: { name: 'Blues', playerIds: ['p2'] },
     },
     stats: {
-      p1: { shots: { 1: 0, 2: 1, 3: 1 }, assists: 2 },
-      p2: { shots: { 1: 1, 2: 0, 3: 0 }, assists: 0 },
+      p1: { shots: { 1: 1, 2: 1, 3: 1 }, assists: 0 },
+      p2: { shots: { 1: 0, 2: 0, 3: 0 }, assists: 1 },
     },
     log: [
-      { playerId: 'p1', playerName: 'Alice', stat: '2', at: new Date().toISOString() },
-      { playerId: 'p1', playerName: 'Alice', stat: '3', at: new Date().toISOString() },
-      { playerId: 'p1', playerName: 'Alice', stat: 'assists', at: new Date().toISOString() },
-      { playerId: 'p1', playerName: 'Alice', stat: 'assists', at: new Date().toISOString() },
-      { playerId: 'p2', playerName: 'Bob', stat: '1', at: new Date().toISOString() },
+      { id: 'e1', playerId: 'p1', playerName: 'Alice', stat: '2', at: new Date().toISOString(), assist: { playerId: 'p2', playerName: 'Bob' } },
+      { id: 'e2', playerId: 'p1', playerName: 'Alice', stat: '3', at: new Date().toISOString() },
+      { id: 'e3', playerId: 'p1', playerName: 'Alice', stat: '1', at: new Date().toISOString(), andOne: true },
     ],
+    undoStack: [],
   };
 }
 
@@ -44,14 +43,17 @@ describe('Ending and discarding a game', () => {
     const games = JSON.parse(localStorage.getItem('hoops_games'));
     expect(games).toHaveLength(1);
     const [game] = games;
-    expect(game.teams.A.score).toBe(5); // 2 + 3
-    expect(game.teams.B.score).toBe(1);
-    expect(game.events).toHaveLength(5);
+    expect(game.teams.A.score).toBe(6); // 1 + 2 + 3
+    expect(game.teams.B.score).toBe(0);
+    expect(game.events).toHaveLength(3);
 
     const alice = game.teams.A.players.find(p => p.id === 'p1');
-    expect(alice.points).toBe(5);
-    expect(alice.assists).toBe(2);
-    expect(alice.shots).toEqual({ 1: 0, 2: 1, 3: 1 });
+    expect(alice.points).toBe(6);
+    expect(alice.assists).toBe(0);
+    expect(alice.shots).toEqual({ 1: 1, 2: 1, 3: 1 });
+
+    const bob = game.teams.B.players.find(p => p.id === 'p2');
+    expect(bob.assists).toBe(1);
   });
 
   test('declining the end-game confirmation keeps the game active', () => {

@@ -61,6 +61,7 @@ describe('Players', () => {
         p2: { shots: { 1: 0, 2: 0, 3: 0 }, assists: 0 },
       },
       log: [],
+      undoStack: [],
     };
 
     const { document, localStorage, alerts } = loadApp({

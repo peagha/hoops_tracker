@@ -21,6 +21,7 @@ function activeGame() {
       p3: { shots: { 1: 0, 2: 0, 3: 0 }, assists: 0 },
     },
     log: [],
+    undoStack: [],
   };
 }
 
@@ -125,7 +126,9 @@ describe('Scoring an active game', () => {
 
     const stored = JSON.parse(localStorage.getItem('hoops_current_game'));
     expect(stored.stats.p3.assists).toBe(1);
-    expect(stored.log).toHaveLength(2);
+    expect(stored.log).toHaveLength(1);
+    expect(stored.log[0].assist).toEqual({ playerId: 'p3', playerName: 'Charlie' });
+    expect(stored.undoStack.map(a => a.type)).toEqual(['shot', 'assist']);
   });
 
   test('tapping +1 records an and-one for the scorer and shows a badge', () => {
@@ -142,7 +145,9 @@ describe('Scoring an active game', () => {
 
     const stored = JSON.parse(localStorage.getItem('hoops_current_game'));
     expect(stored.stats.p1.shots[1]).toBe(1);
-    expect(stored.log).toHaveLength(2);
+    expect(stored.log).toHaveLength(1);
+    expect(stored.log[0].andOne).toBe(true);
+    expect(stored.undoStack.map(a => a.type)).toEqual(['shot', 'andOne']);
   });
 
   test('undo asks for confirmation before reverting the last action', () => {
@@ -168,6 +173,7 @@ describe('Scoring an active game', () => {
     expect(document.getElementById('undo-btn').disabled).toBe(true);
     stored = JSON.parse(localStorage.getItem('hoops_current_game'));
     expect(stored.log).toHaveLength(0);
+    expect(stored.undoStack).toHaveLength(0);
   });
 
   test('undo is disabled and asks nothing when the log is empty', () => {
@@ -180,5 +186,46 @@ describe('Scoring an active game', () => {
     expect(confirms).toHaveLength(0);
     const stored = JSON.parse(localStorage.getItem('hoops_current_game'));
     expect(stored.log).toHaveLength(0);
+  });
+
+  test('undo reverts and-one, then assist, then the shot itself, in order', () => {
+    const { document, localStorage } = loadApp({
+      storage: { hoops_players: players, hoops_current_game: activeGame() },
+      confirmReturn: true,
+    });
+
+    click(quickBtn(document, 'A', '3'));
+    click(document.querySelectorAll('#picker-list .picker-btn')[0]); // Alice scores +3
+
+    click(document.querySelector('#feed [data-action="and-one"]')); // Alice and-one
+    click(document.querySelector('#feed [data-action="ast"]'));
+    click(document.querySelectorAll('#picker-list .picker-btn')[0]); // Charlie assists
+
+    let stored = JSON.parse(localStorage.getItem('hoops_current_game'));
+    expect(stored.undoStack.map(a => a.type)).toEqual(['shot', 'andOne', 'assist']);
+    expect(document.getElementById('team-a-score').textContent).toBe('4');
+
+    // Undo the assist.
+    click(document.getElementById('undo-btn'));
+    stored = JSON.parse(localStorage.getItem('hoops_current_game'));
+    expect(stored.log[0].assist).toBeUndefined();
+    expect(stored.stats.p3.assists).toBe(0);
+    expect(stored.undoStack.map(a => a.type)).toEqual(['shot', 'andOne']);
+
+    // Undo the and-one.
+    click(document.getElementById('undo-btn'));
+    stored = JSON.parse(localStorage.getItem('hoops_current_game'));
+    expect(stored.log[0].andOne).toBeUndefined();
+    expect(stored.stats.p1.shots[1]).toBe(0);
+    expect(document.getElementById('team-a-score').textContent).toBe('3');
+    expect(stored.undoStack.map(a => a.type)).toEqual(['shot']);
+
+    // Undo the shot itself.
+    click(document.getElementById('undo-btn'));
+    stored = JSON.parse(localStorage.getItem('hoops_current_game'));
+    expect(stored.log).toHaveLength(0);
+    expect(stored.stats.p1.shots[3]).toBe(0);
+    expect(document.getElementById('team-a-score').textContent).toBe('0');
+    expect(document.getElementById('undo-btn').disabled).toBe(true);
   });
 });
