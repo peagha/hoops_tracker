@@ -350,6 +350,10 @@
     const entry = currentGame.log.find(e => e.id === entryId);
     if (!entry) return;
     const teammates = currentGame.teams[teamKeyForPlayer(entry.playerId)].playerIds.filter(id => id !== entry.playerId);
+    if (teammates.length === 1) {
+      recordAssist(entry.id, teammates[0]);
+      return;
+    }
     openPicker(`Who assisted ${entry.playerName}?`, playerOptions(teammates), (assistPlayerId) => {
       recordAssist(entry.id, assistPlayerId);
     });

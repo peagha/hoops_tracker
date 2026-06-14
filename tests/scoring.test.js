@@ -103,7 +103,7 @@ describe('Scoring an active game', () => {
     expect(feedItem.querySelector('[data-action="ast"]')).toBeNull();
   });
 
-  test('tapping AST opens a teammate picker and resolves to a badge', () => {
+  test('tapping AST with a single teammate credits them directly without a picker', () => {
     const { document, localStorage } = loadApp({ storage: { hoops_players: players, hoops_current_game: activeGame() } });
 
     click(quickBtn(document, 'A', '3'));
@@ -112,13 +112,6 @@ describe('Scoring an active game', () => {
     const astBtn = document.querySelector('#feed [data-action="ast"]');
     expect(astBtn).not.toBeNull();
     click(astBtn);
-
-    expect(document.getElementById('picker-overlay').classList.contains('hidden')).toBe(false);
-    const options = document.querySelectorAll('#picker-list .picker-btn');
-    expect(options).toHaveLength(1);
-    expect(options[0].textContent).toBe('Charlie');
-
-    click(options[0]);
 
     expect(document.getElementById('picker-overlay').classList.contains('hidden')).toBe(true);
     expect(document.getElementById('feed').textContent).toContain('AST Charlie');
@@ -139,8 +132,7 @@ describe('Scoring an active game', () => {
 
     click(quickBtn(document, 'A', '3'));
     click(document.querySelectorAll('#picker-list .picker-btn')[0]); // Alice scores
-    click(document.querySelector('#feed [data-action="ast"]'));
-    click(document.querySelectorAll('#picker-list .picker-btn')[0]); // Charlie assists
+    click(document.querySelector('#feed [data-action="ast"]')); // Charlie assists directly
 
     const removeBtn = document.querySelector('#feed [data-action="remove-ast"]');
     expect(removeBtn).not.toBeNull();
@@ -249,8 +241,7 @@ describe('Scoring an active game', () => {
     click(document.querySelectorAll('#picker-list .picker-btn')[0]); // Alice scores +3
 
     click(document.querySelector('#feed [data-action="and-one"]')); // Alice and-one
-    click(document.querySelector('#feed [data-action="ast"]'));
-    click(document.querySelectorAll('#picker-list .picker-btn')[0]); // Charlie assists
+    click(document.querySelector('#feed [data-action="ast"]')); // Charlie assists directly
 
     let stored = JSON.parse(localStorage.getItem('hoops_current_game'));
     expect(stored.undoStack.map(a => a.type)).toEqual(['shot', 'andOne', 'assist']);
