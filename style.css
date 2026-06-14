@@ -332,17 +332,18 @@ body {
   gap: 12px;
   margin-bottom: 12px;
   flex-shrink: 0;
+  justify-content: space-between;
 }
 
 .quick-team {
-  flex: 1;
   display: flex;
   gap: 8px;
 }
 
 .quick-btn {
-  flex: 1;
+  width: 60px;
   height: 60px;
+  aspect-ratio: 1 / 1;
   background: var(--card);
   color: var(--text);
   border: none;
