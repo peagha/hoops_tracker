@@ -109,6 +109,7 @@
     }
     players = players.filter(p => p.id !== id);
     delete setupAssignments[id];
+    delete setupPresent[id];
     save(STORAGE.players, players);
     renderPlayers();
     renderPlay();
@@ -124,6 +125,7 @@
 
   // ---------- Play ----------
   let setupAssignments = {}; // playerId -> 'A' | 'B'
+  let setupPresent = {};     // playerId -> bool (default true)
   let teamAName = 'Team A';
   let teamBName = 'Team B';
 
@@ -159,21 +161,31 @@
       list.innerHTML = '<p class="empty">Add players in the Players tab first.</p>';
     }
     players.forEach(p => {
+      if (!(p.id in setupPresent)) setupPresent[p.id] = true;
+      const present = setupPresent[p.id];
       const row = document.createElement('div');
-      row.className = 'assign-row';
+      row.className = 'assign-row' + (present ? '' : ' assign-absent');
       row.innerHTML = `
+        <button type="button" class="assign-present-btn${present ? ' active' : ''}" aria-label="Toggle present">✓</button>
         <span class="assign-name">${escapeHtml(p.name)}</span>
-        <div class="assign-toggle">
+        <div class="assign-toggle${present ? '' : ' hidden'}">
           <button type="button" class="assign-btn" data-team="A">A</button>
           <button type="button" class="assign-btn" data-team="B">B</button>
         </div>
       `;
+      const presentBtn = row.querySelector('.assign-present-btn');
+      const toggleDiv = row.querySelector('.assign-toggle');
       const [btnA, btnB] = row.querySelectorAll('.assign-btn');
       const updateButtons = () => {
         btnA.classList.toggle('active', setupAssignments[p.id] === 'A');
         btnB.classList.toggle('active', setupAssignments[p.id] === 'B');
       };
       updateButtons();
+      presentBtn.addEventListener('click', () => {
+        setupPresent[p.id] = !setupPresent[p.id];
+        if (!setupPresent[p.id]) delete setupAssignments[p.id];
+        renderPlaySetup();
+      });
       btnA.addEventListener('click', () => {
         setupAssignments[p.id] = setupAssignments[p.id] === 'A' ? null : 'A';
         updateButtons();
@@ -185,11 +197,23 @@
       list.appendChild(row);
     });
 
+    document.getElementById('shuffle-btn').disabled = players.filter(p => setupPresent[p.id]).length < 2;
     document.getElementById('start-game-btn').disabled = players.length === 0;
   }
 
   document.getElementById('team-a-name-input').addEventListener('input', (e) => { teamAName = e.target.value; });
   document.getElementById('team-b-name-input').addEventListener('input', (e) => { teamBName = e.target.value; });
+
+  document.getElementById('shuffle-btn').addEventListener('click', () => {
+    const presentIds = players.filter(p => setupPresent[p.id]).map(p => p.id);
+    for (let i = presentIds.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [presentIds[i], presentIds[j]] = [presentIds[j], presentIds[i]];
+    }
+    const half = Math.ceil(presentIds.length / 2);
+    presentIds.forEach((id, idx) => { setupAssignments[id] = idx < half ? 'A' : 'B'; });
+    renderPlaySetup();
+  });
 
   document.getElementById('start-game-btn').addEventListener('click', () => {
     const teamAIds = players.filter(p => setupAssignments[p.id] === 'A').map(p => p.id);

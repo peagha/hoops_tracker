@@ -233,6 +233,30 @@ body {
   gap: 6px;
 }
 
+.assign-absent {
+  opacity: 0.45;
+}
+
+.assign-present-btn {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--card-alt);
+  border-radius: 50%;
+  background: none;
+  color: transparent;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  touch-action: manipulation;
+  flex-shrink: 0;
+}
+
+.assign-present-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #1a1a1a;
+}
+
 .assign-btn {
   width: 40px;
   height: 40px;
@@ -249,6 +273,12 @@ body {
 .assign-btn.active {
   background: var(--accent);
   color: #1a1a1a;
+}
+
+.shuffle-btn {
+  width: 100%;
+  margin-top: 8px;
+  font-size: 1rem;
 }
 
 /* Active game: full-screen overlay while a game is in progress */
