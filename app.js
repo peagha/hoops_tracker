@@ -791,11 +791,13 @@
   document.getElementById('bootstrap-players-btn').addEventListener('click', () => {
     const existing = new Set(players.map(p => p.name));
     const toAdd = TEST_PLAYERS.filter(n => !existing.has(n));
-    if (toAdd.length === 0) { alert('Test players are already in the list.'); return; }
     toAdd.forEach(name => players.push({ id: crypto.randomUUID(), name }));
-    save(STORAGE.players, players);
-    renderPlayers();
-    renderPlay();
+    if (toAdd.length > 0) {
+      save(STORAGE.players, players);
+      renderPlayers();
+      renderPlay();
+    }
+    switchView('players');
   });
 
   // ---------- Init ----------
