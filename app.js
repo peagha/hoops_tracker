@@ -758,6 +758,36 @@
     renderHistory();
   });
 
+  document.getElementById('clear-history-btn').addEventListener('click', () => {
+    if (!confirm(`Delete all ${games.length} game(s) from history? This cannot be undone.`)) return;
+    games = [];
+    save(STORAGE.games, games);
+    renderHistory();
+  });
+
+  document.getElementById('clear-players-btn').addEventListener('click', () => {
+    if (currentGame) { alert('Cannot clear players while a game is in progress.'); return; }
+    if (!confirm(`Remove all ${players.length} player(s)? This cannot be undone.`)) return;
+    players = [];
+    setupAssignments = {};
+    setupPresent = {};
+    save(STORAGE.players, players);
+    renderPlayers();
+    renderPlay();
+  });
+
+  const TEST_PLAYERS = ['Alex', 'Blake', 'Casey', 'Dana', 'Eric', 'Fran', 'Glen', 'Hana', 'Ivan', 'Jade'];
+
+  document.getElementById('bootstrap-players-btn').addEventListener('click', () => {
+    const existing = new Set(players.map(p => p.name));
+    const toAdd = TEST_PLAYERS.filter(n => !existing.has(n));
+    if (toAdd.length === 0) { alert('Test players are already in the list.'); return; }
+    toAdd.forEach(name => players.push({ id: crypto.randomUUID(), name }));
+    save(STORAGE.players, players);
+    renderPlayers();
+    renderPlay();
+  });
+
   // ---------- Init ----------
   renderPlayers();
   renderPlay();

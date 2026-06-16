@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#111827">
 <title>Hoops Tracker</title>
-<link rel="stylesheet" href="style.css?v=2026.06.16-0813">
+<link rel="stylesheet" href="style.css?v=2026.06.16-0815">
 </head>
 <body>
 <header class="app-header">
@@ -106,9 +106,11 @@
   </section>
 
   <section class="menu-section">
-    <h3 class="menu-section-heading">Danger Zone</h3>
-    <p class="muted">Erase all players, game history, and any in-progress game from this device. This cannot be undone.</p>
-    <button id="reset-app-btn" class="btn-text danger">Delete All Data</button>
+    <h3 class="menu-section-heading">Admin</h3>
+    <button id="bootstrap-players-btn" class="btn-secondary" style="width:100%;margin-bottom:8px;">Add Test Players</button>
+    <button id="clear-history-btn" class="btn-text danger">Clear Game History</button>
+    <button id="clear-players-btn" class="btn-text danger">Clear Players</button>
+    <button id="reset-app-btn" class="btn-text danger">Clear Everything</button>
   </section>
 
   <section class="menu-section">
@@ -124,7 +126,7 @@
   <button data-view="menu" class="nav-btn">☰<span>Menu</span></button>
 </nav>
 
-<script>window.APP_VERSION = "2026.06.16-0813";</script>
-<script src="app.js?v=2026.06.16-0813"></script>
+<script>window.APP_VERSION = "2026.06.16-0815";</script>
+<script src="app.js?v=2026.06.16-0815"></script>
 </body>
 </html>
