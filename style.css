@@ -275,9 +275,17 @@ body {
   color: #1a1a1a;
 }
 
+.setup-actions {
+  position: sticky;
+  bottom: calc(var(--nav-height) + env(safe-area-inset-bottom));
+  background: var(--bg);
+  padding: 8px 0 4px;
+  margin-top: 8px;
+}
+
 .shuffle-btn {
   width: 100%;
-  margin-top: 8px;
+  margin-bottom: 6px;
   font-size: 1rem;
 }
 
