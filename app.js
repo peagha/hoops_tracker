@@ -310,22 +310,19 @@
       return;
     }
 
-    const recentIds = new Set(log.slice(-2).map(e => e.id));
-
     const rows = log.slice().reverse().map(entry => {
       const time = formatTime(new Date(entry.at));
-      const isRecent = recentIds.has(entry.id);
       const teammates = currentGame.teams[teamKeyForPlayer(entry.playerId)].playerIds.filter(id => id !== entry.playerId);
 
       let actions = '';
       if (entry.assist) {
         actions += `<button type="button" class="feed-badge removable" data-action="remove-ast" data-entry="${entry.id}">AST ${escapeHtml(entry.assist.playerName)}</button>`;
-      } else if (isRecent && teammates.length > 0) {
+      } else if (teammates.length > 0) {
         actions += `<button type="button" class="feed-chip" data-action="ast" data-entry="${entry.id}">AST</button>`;
       }
       if (entry.andOne) {
         actions += `<button type="button" class="feed-badge removable" data-action="remove-and-one" data-entry="${entry.id}">+1</button>`;
-      } else if (isRecent) {
+      } else {
         actions += `<button type="button" class="feed-chip" data-action="and-one" data-entry="${entry.id}">+1</button>`;
       }
 
