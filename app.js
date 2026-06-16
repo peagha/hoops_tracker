@@ -34,6 +34,12 @@
 
   navButtons.forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
 
+  function randomUUID() {
+    if (crypto.randomUUID) return crypto.randomUUID();
+    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+      (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+  }
+
   function escapeHtml(str) {
     return str.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
@@ -96,7 +102,7 @@
   function addPlayer(name) {
     name = name.trim();
     if (!name) return;
-    players.push({ id: crypto.randomUUID(), name });
+    players.push({ id: randomUUID(), name });
     save(STORAGE.players, players);
     renderPlayers();
     renderPlay();
@@ -236,7 +242,7 @@
     const stats = {};
     [...teamAIds, ...teamBIds].forEach(id => { stats[id] = { shots: { 1: 0, 2: 0, 3: 0 }, assists: 0 }; });
     currentGame = {
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       startedAt: new Date().toISOString(),
       teams: {
         A: { name: teamAName.trim() || 'Team A', playerIds: teamAIds },
@@ -427,7 +433,7 @@
     currentGame.stats[playerId].shots[points] += 1;
     const player = players.find(p => p.id === playerId);
     const entry = {
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       playerId,
       playerName: player ? player.name : 'Unknown',
       stat: points,
@@ -791,7 +797,7 @@
   document.getElementById('bootstrap-players-btn').addEventListener('click', () => {
     const existing = new Set(players.map(p => p.name));
     const toAdd = TEST_PLAYERS.filter(n => !existing.has(n));
-    toAdd.forEach(name => players.push({ id: crypto.randomUUID(), name }));
+    toAdd.forEach(name => players.push({ id: randomUUID(), name }));
     if (toAdd.length > 0) {
       save(STORAGE.players, players);
       renderPlayers();
