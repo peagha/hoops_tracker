@@ -667,6 +667,68 @@ body {
   padding: 24px 0;
 }
 
+/* End-game summary */
+.summary-scoreboard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: var(--card);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.summary-team {
+  flex: 1;
+  text-align: center;
+}
+
+.summary-team-name {
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.summary-score {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.summary-score.winner {
+  color: var(--accent);
+}
+
+.summary-mid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 1.4rem;
+}
+
+.summary-duration {
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.summary-winner {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 0 0 12px;
+}
+
 /* Bottom nav */
 .bottom-nav {
   position: fixed;

@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#111827">
 <title>Hoops Tracker</title>
-<link rel="stylesheet" href="style.css?v=2026.06.16-0807">
+<link rel="stylesheet" href="style.css?v=2026.06.16-0810">
 </head>
 <body>
 <header class="app-header">
@@ -26,6 +26,12 @@
     <div id="setup-players-list" class="assign-list"></div>
     <button id="shuffle-btn" class="btn-secondary shuffle-btn">⇌ Shuffle Teams</button>
     <button id="start-game-btn" class="btn-primary">Start Game</button>
+  </div>
+
+  <div id="play-summary" class="hidden">
+    <h2>Game Over</h2>
+    <div id="summary-content"></div>
+    <button id="summary-done-btn" class="btn-primary">New Game</button>
   </div>
 
   <div id="play-active" class="hidden">
@@ -116,7 +122,7 @@
   <button data-view="menu" class="nav-btn">☰<span>Menu</span></button>
 </nav>
 
-<script>window.APP_VERSION = "2026.06.16-0807";</script>
-<script src="app.js?v=2026.06.16-0807"></script>
+<script>window.APP_VERSION = "2026.06.16-0810";</script>
+<script src="app.js?v=2026.06.16-0810"></script>
 </body>
 </html>

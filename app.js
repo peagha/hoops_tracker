@@ -146,6 +146,7 @@
   function renderPlaySetup() {
     document.getElementById('play-setup').classList.remove('hidden');
     document.getElementById('play-active').classList.add('hidden');
+    document.getElementById('play-summary').classList.add('hidden');
 
     document.getElementById('team-a-name-input').value = teamAName;
     document.getElementById('team-b-name-input').value = teamBName;
@@ -278,6 +279,7 @@
   function renderActiveGame() {
     document.getElementById('play-setup').classList.add('hidden');
     document.getElementById('play-active').classList.remove('hidden');
+    document.getElementById('play-summary').classList.add('hidden');
 
     document.getElementById('team-a-name').textContent = currentGame.teams.A.name;
     document.getElementById('team-b-name').textContent = currentGame.teams.B.name;
@@ -515,10 +517,11 @@
 
   document.getElementById('end-game-btn').addEventListener('click', () => {
     if (!confirm('End this game and save it to history?')) return;
+    const endedAt = new Date().toISOString();
     const game = {
       id: currentGame.id,
       startedAt: currentGame.startedAt,
-      endedAt: new Date().toISOString(),
+      endedAt,
       teams: {
         A: buildTeamResult(currentGame.teams.A),
         B: buildTeamResult(currentGame.teams.B),
@@ -530,8 +533,66 @@
     currentGame = null;
     localStorage.removeItem(STORAGE.current);
     stopClock();
-    renderPlay();
     renderHistory();
+    showSummary(game);
+  });
+
+  function showSummary(game) {
+    document.getElementById('play-setup').classList.add('hidden');
+    document.getElementById('play-active').classList.add('hidden');
+    document.getElementById('play-summary').classList.remove('hidden');
+
+    const duration = formatElapsed(new Date(game.endedAt) - new Date(game.startedAt));
+    const teamA = game.teams.A;
+    const teamB = game.teams.B;
+    const winner = teamA.score > teamB.score ? teamA.name
+      : teamB.score > teamA.score ? teamB.name : null;
+
+    document.getElementById('summary-content').innerHTML = `
+      <div class="summary-scoreboard">
+        <div class="summary-team">
+          <div class="summary-team-name">${escapeHtml(teamA.name)}</div>
+          <div class="summary-score${teamA.score >= teamB.score ? ' winner' : ''}">${teamA.score}</div>
+        </div>
+        <div class="summary-mid">
+          <div class="summary-sep">–</div>
+          <div class="summary-duration">${duration}</div>
+        </div>
+        <div class="summary-team">
+          <div class="summary-team-name">${escapeHtml(teamB.name)}</div>
+          <div class="summary-score${teamB.score >= teamA.score ? ' winner' : ''}">${teamB.score}</div>
+        </div>
+      </div>
+      ${winner ? `<p class="summary-winner">${escapeHtml(winner)} wins!</p>` : '<p class="summary-winner">Tie game!</p>'}
+      ${renderSummaryTable(teamA)}
+      ${renderSummaryTable(teamB)}
+      <button class="btn-secondary summary-share-btn" style="width:100%;margin-top:8px;">Share Summary</button>
+    `;
+
+    document.querySelector('.summary-share-btn').addEventListener('click', () => shareGameSummary(game));
+  }
+
+  function renderSummaryTable(team) {
+    const rows = team.players
+      .slice()
+      .sort((a, b) => b.points - a.points)
+      .map(p => `<tr>
+        <td>${escapeHtml(p.name)}</td>
+        <td>${p.shots[1]}</td><td>${p.shots[2]}</td><td>${p.shots[3]}</td>
+        <td>${p.assists}</td><td>${p.points}</td>
+      </tr>`)
+      .join('');
+    return `
+      <h4 class="team-table-heading">${escapeHtml(team.name)} — ${team.score}</h4>
+      <table class="game-table">
+        <thead><tr><th>Player</th><th>1PT</th><th>2PT</th><th>3PT</th><th>AST</th><th>PTS</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  document.getElementById('summary-done-btn').addEventListener('click', () => {
+    document.getElementById('play-summary').classList.add('hidden');
+    renderPlaySetup();
   });
 
   document.getElementById('discard-game-btn').addEventListener('click', () => {
