@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#111827">
 <title>Hoops Tracker</title>
-<link rel="stylesheet" href="style.css?v=2026.06.16-0806">
+<link rel="stylesheet" href="style.css?v=2026.06.16-0807">
 </head>
 <body>
 <header class="app-header">
@@ -34,7 +34,10 @@
         <div class="scoreboard-name" id="team-a-name"></div>
         <div class="scoreboard-score" id="team-a-score">0</div>
       </div>
-      <div class="scoreboard-sep">–</div>
+      <div class="scoreboard-sep">
+        <span>–</span>
+        <span class="game-clock" id="game-clock">0:00</span>
+      </div>
       <div class="scoreboard-team">
         <div class="scoreboard-name" id="team-b-name"></div>
         <div class="scoreboard-score" id="team-b-score">0</div>
@@ -113,7 +116,7 @@
   <button data-view="menu" class="nav-btn">☰<span>Menu</span></button>
 </nav>
 
-<script>window.APP_VERSION = "2026.06.16-0806";</script>
-<script src="app.js?v=2026.06.16-0806"></script>
+<script>window.APP_VERSION = "2026.06.16-0807";</script>
+<script src="app.js?v=2026.06.16-0807"></script>
 </body>
 </html>

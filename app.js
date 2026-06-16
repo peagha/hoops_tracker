@@ -247,6 +247,34 @@
     return team.playerIds.reduce((sum, id) => sum + playerPoints(currentGame.stats[id]), 0);
   }
 
+  let clockInterval = null;
+
+  function formatElapsed(ms) {
+    const s = Math.floor(ms / 1000);
+    const m = Math.floor(s / 60);
+    const h = Math.floor(m / 60);
+    const ss = String(s % 60).padStart(2, '0');
+    const mm = String(m % 60).padStart(2, '0');
+    return h > 0 ? `${h}:${mm}:${ss}` : `${m}:${ss}`;
+  }
+
+  function startClock() {
+    if (clockInterval) clearInterval(clockInterval);
+    const el = document.getElementById('game-clock');
+    const tick = () => {
+      if (!currentGame || !el) return;
+      el.textContent = formatElapsed(Date.now() - new Date(currentGame.startedAt).getTime());
+    };
+    tick();
+    clockInterval = setInterval(tick, 1000);
+  }
+
+  function stopClock() {
+    if (clockInterval) { clearInterval(clockInterval); clockInterval = null; }
+    const el = document.getElementById('game-clock');
+    if (el) el.textContent = '0:00';
+  }
+
   function renderActiveGame() {
     document.getElementById('play-setup').classList.add('hidden');
     document.getElementById('play-active').classList.remove('hidden');
@@ -259,6 +287,7 @@
     document.getElementById('qa-label-b').textContent = currentGame.teams.B.name;
 
     renderFeed();
+    startClock();
 
     document.getElementById('undo-btn').disabled = currentGame.undoStack.length === 0;
   }
@@ -500,6 +529,7 @@
     save(STORAGE.games, games);
     currentGame = null;
     localStorage.removeItem(STORAGE.current);
+    stopClock();
     renderPlay();
     renderHistory();
   });
@@ -508,6 +538,7 @@
     if (!confirm('Discard this game without saving?')) return;
     currentGame = null;
     localStorage.removeItem(STORAGE.current);
+    stopClock();
     renderPlay();
   });
 
