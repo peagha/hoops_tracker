@@ -233,28 +233,26 @@ body {
   gap: 6px;
 }
 
-.assign-absent {
-  opacity: 0.45;
-}
-
-.assign-present-btn {
-  width: 32px;
-  height: 32px;
-  border: 2px solid var(--card-alt);
-  border-radius: 50%;
-  background: none;
-  color: transparent;
-  font-weight: 700;
-  font-size: 0.9rem;
+.assign-row-present {
   cursor: pointer;
-  touch-action: manipulation;
-  flex-shrink: 0;
 }
 
-.assign-present-btn.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #1a1a1a;
+.assign-row-absent {
+  background: var(--card-alt);
+  cursor: pointer;
+}
+
+.assign-row-absent .assign-name {
+  color: var(--muted);
+}
+
+.assign-separator {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  padding: 8px 4px 2px;
 }
 
 .assign-btn {

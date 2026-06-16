@@ -161,42 +161,49 @@
     if (players.length === 0) {
       list.innerHTML = '<p class="empty">Add players in the Players tab first.</p>';
     }
-    players.forEach(p => {
-      if (!(p.id in setupPresent)) setupPresent[p.id] = true;
-      const present = setupPresent[p.id];
+
+    players.forEach(p => { if (!(p.id in setupPresent)) setupPresent[p.id] = true; });
+
+    const presentPlayers = players.filter(p => setupPresent[p.id]);
+    const absentPlayers  = players.filter(p => !setupPresent[p.id]);
+
+    const addRow = (p, isPresent) => {
       const row = document.createElement('div');
-      row.className = 'assign-row' + (present ? '' : ' assign-absent');
-      row.innerHTML = `
-        <button type="button" class="assign-present-btn${present ? ' active' : ''}" aria-label="Toggle present">✓</button>
-        <span class="assign-name">${escapeHtml(p.name)}</span>
-        <div class="assign-toggle${present ? '' : ' hidden'}">
-          <button type="button" class="assign-btn" data-team="A">A</button>
-          <button type="button" class="assign-btn" data-team="B">B</button>
-        </div>
-      `;
-      const presentBtn = row.querySelector('.assign-present-btn');
-      const toggleDiv = row.querySelector('.assign-toggle');
-      const [btnA, btnB] = row.querySelectorAll('.assign-btn');
-      const updateButtons = () => {
-        btnA.classList.toggle('active', setupAssignments[p.id] === 'A');
-        btnB.classList.toggle('active', setupAssignments[p.id] === 'B');
-      };
-      updateButtons();
-      presentBtn.addEventListener('click', () => {
-        setupPresent[p.id] = !setupPresent[p.id];
+      row.className = isPresent ? 'assign-row assign-row-present' : 'assign-row assign-row-absent';
+      row.innerHTML = isPresent
+        ? `<span class="assign-name">${escapeHtml(p.name)}</span>
+           <div class="assign-toggle">
+             <button type="button" class="assign-btn" data-team="A">A</button>
+             <button type="button" class="assign-btn" data-team="B">B</button>
+           </div>`
+        : `<span class="assign-name">${escapeHtml(p.name)}</span>`;
+      row.addEventListener('click', (e) => {
+        if (e.target.classList.contains('assign-btn')) return;
+        setupPresent[p.id] = !isPresent;
         if (!setupPresent[p.id]) delete setupAssignments[p.id];
         renderPlaySetup();
       });
-      btnA.addEventListener('click', () => {
-        setupAssignments[p.id] = setupAssignments[p.id] === 'A' ? null : 'A';
-        updateButtons();
-      });
-      btnB.addEventListener('click', () => {
-        setupAssignments[p.id] = setupAssignments[p.id] === 'B' ? null : 'B';
-        updateButtons();
-      });
+      if (isPresent) {
+        const [btnA, btnB] = row.querySelectorAll('.assign-btn');
+        const sync = () => {
+          btnA.classList.toggle('active', setupAssignments[p.id] === 'A');
+          btnB.classList.toggle('active', setupAssignments[p.id] === 'B');
+        };
+        sync();
+        btnA.addEventListener('click', () => { setupAssignments[p.id] = setupAssignments[p.id] === 'A' ? null : 'A'; sync(); });
+        btnB.addEventListener('click', () => { setupAssignments[p.id] = setupAssignments[p.id] === 'B' ? null : 'B'; sync(); });
+      }
       list.appendChild(row);
-    });
+    };
+
+    presentPlayers.forEach(p => addRow(p, true));
+    if (absentPlayers.length > 0) {
+      const sep = document.createElement('div');
+      sep.className = 'assign-separator';
+      sep.textContent = absentPlayers.length === players.length ? 'Tap a player to add them' : 'Not playing';
+      list.appendChild(sep);
+      absentPlayers.forEach(p => addRow(p, false));
+    }
 
     document.getElementById('shuffle-btn').disabled = players.filter(p => setupPresent[p.id]).length < 2;
     document.getElementById('start-game-btn').disabled = players.length === 0;
