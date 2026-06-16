@@ -162,7 +162,7 @@
       list.innerHTML = '<p class="empty">Add players in the Players tab first.</p>';
     }
 
-    players.forEach(p => { if (!(p.id in setupPresent)) setupPresent[p.id] = true; });
+    players.forEach(p => { if (!(p.id in setupPresent)) setupPresent[p.id] = false; });
 
     const presentPlayers = players.filter(p => setupPresent[p.id]);
     const absentPlayers  = players.filter(p => !setupPresent[p.id]);
