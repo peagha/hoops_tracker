@@ -2,7 +2,8 @@
   "name": "hoops_tracker",
   "private": true,
   "scripts": {
-    "test": "bun test"
+    "test": "bun test",
+    "start": "LAN=$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || echo 'unknown') && echo \"\\n  Local:   http://localhost:4173\\n  Network: http://$LAN:4173\\n\" && bunx serve -l tcp://0.0.0.0:4173 ."
   },
   "devDependencies": {
     "@types/bun": "latest",

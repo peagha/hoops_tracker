@@ -4,7 +4,7 @@
     {
       "name": "hoops-tracker",
       "runtimeExecutable": "bunx",
-      "runtimeArgs": ["serve", "-l", "4173", "."],
+      "runtimeArgs": ["serve", "-l", "tcp://0.0.0.0:4173", "."],
       "port": 4173
     }
   ]
