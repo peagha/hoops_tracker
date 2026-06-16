@@ -327,22 +327,27 @@ body {
 
 /* Quick score actions */
 .quick-actions {
-  display: flex;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
   margin-bottom: 12px;
   flex-shrink: 0;
-  justify-content: space-between;
 }
 
-.quick-team {
-  display: flex;
-  gap: 8px;
-  flex: 1;
+.quick-team-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .quick-btn {
-  flex: 1;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 3 / 1;
   background: var(--card);
   color: var(--text);
   border: none;
@@ -351,6 +356,7 @@ body {
   font-weight: 800;
   cursor: pointer;
   touch-action: manipulation;
+  width: 100%;
 }
 
 .quick-btn:active {

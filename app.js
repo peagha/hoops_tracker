@@ -231,6 +231,8 @@
     document.getElementById('team-b-name').textContent = currentGame.teams.B.name;
     document.getElementById('team-a-score').textContent = teamScore(currentGame.teams.A);
     document.getElementById('team-b-score').textContent = teamScore(currentGame.teams.B);
+    document.getElementById('qa-label-a').textContent = currentGame.teams.A.name;
+    document.getElementById('qa-label-b').textContent = currentGame.teams.B.name;
 
     renderFeed();
 

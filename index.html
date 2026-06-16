@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#111827">
 <title>Hoops Tracker</title>
-<link rel="stylesheet" href="style.css?v=2026.06.14-1040">
+<link rel="stylesheet" href="style.css?v=2026.06.16-0803">
 </head>
 <body>
 <header class="app-header">
@@ -40,14 +40,12 @@
       </div>
     </div>
     <div class="quick-actions">
-      <div class="quick-team">
-        <button type="button" class="quick-btn" data-team="A" data-points="3">+3</button>
-        <button type="button" class="quick-btn" data-team="A" data-points="2">+2</button>
-      </div>
-      <div class="quick-team">
-        <button type="button" class="quick-btn" data-team="B" data-points="3">+3</button>
-        <button type="button" class="quick-btn" data-team="B" data-points="2">+2</button>
-      </div>
+      <div class="quick-team-label" id="qa-label-a"></div>
+      <div class="quick-team-label" id="qa-label-b"></div>
+      <button type="button" class="quick-btn" data-team="A" data-points="3">+3</button>
+      <button type="button" class="quick-btn" data-team="B" data-points="3">+3</button>
+      <button type="button" class="quick-btn" data-team="A" data-points="2">+2</button>
+      <button type="button" class="quick-btn" data-team="B" data-points="2">+2</button>
     </div>
     <div id="feed-scroll" class="feed-scroll">
       <div id="feed" class="feed"></div>
@@ -114,7 +112,7 @@
   <button data-view="menu" class="nav-btn">☰<span>Menu</span></button>
 </nav>
 
-<script>window.APP_VERSION = "2026.06.14-1040";</script>
-<script src="app.js?v=2026.06.14-1040"></script>
+<script>window.APP_VERSION = "2026.06.16-0803";</script>
+<script src="app.js?v=2026.06.16-0803"></script>
 </body>
 </html>
