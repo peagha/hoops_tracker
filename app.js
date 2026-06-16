@@ -167,7 +167,7 @@
     const presentPlayers = players.filter(p => setupPresent[p.id]);
     const absentPlayers  = players.filter(p => !setupPresent[p.id]);
 
-    const addRow = (p, isPresent) => {
+    const addRow = (p, isPresent, parent) => {
       const row = document.createElement('div');
       row.className = isPresent ? 'assign-row assign-row-present' : 'assign-row assign-row-absent';
       row.innerHTML = isPresent
@@ -193,7 +193,7 @@
         btnA.addEventListener('click', () => { setupAssignments[p.id] = setupAssignments[p.id] === 'A' ? null : 'A'; sync(); });
         btnB.addEventListener('click', () => { setupAssignments[p.id] = setupAssignments[p.id] === 'B' ? null : 'B'; sync(); });
       }
-      list.appendChild(row);
+      (parent || list).appendChild(row);
     };
 
     presentPlayers.forEach(p => addRow(p, true));
@@ -202,7 +202,10 @@
       sep.className = 'assign-separator';
       sep.textContent = absentPlayers.length === players.length ? 'Tap a player to add them' : 'Not playing';
       list.appendChild(sep);
-      absentPlayers.forEach(p => addRow(p, false));
+      const grid = document.createElement('div');
+      grid.className = 'assign-absent-grid';
+      list.appendChild(grid);
+      absentPlayers.forEach(p => addRow(p, false, grid));
     }
 
     document.getElementById('shuffle-btn').disabled = players.filter(p => setupPresent[p.id]).length < 2;

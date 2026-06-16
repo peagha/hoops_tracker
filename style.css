@@ -237,13 +237,22 @@ body {
   cursor: pointer;
 }
 
+.assign-absent-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
 .assign-row-absent {
   background: var(--card-alt);
   cursor: pointer;
+  justify-content: center;
+  padding: 12px 8px;
 }
 
 .assign-row-absent .assign-name {
   color: var(--muted);
+  text-align: center;
 }
 
 .assign-separator {
