@@ -8,7 +8,7 @@
   --muted: #9ca3af;
   --danger: #ef4444;
   --nav-height: 64px;
-  --component-height: 113px;
+  --component-height: 96px;
   --scoreboard-height: calc(var(--component-height) * 1.3);
 }
 
