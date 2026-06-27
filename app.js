@@ -396,7 +396,6 @@
     document.getElementById('picker-overlay').classList.add('hidden');
   }
 
-  document.getElementById('picker-cancel').addEventListener('click', closePicker);
   document.getElementById('picker-overlay').addEventListener('click', (e) => {
     if (e.target.id === 'picker-overlay') closePicker();
   });

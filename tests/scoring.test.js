@@ -78,13 +78,13 @@ describe('Scoring an active game', () => {
     expect(stored.stats.p1.shots[3]).toBe(1);
   });
 
-  test('cancelling the player picker records nothing', () => {
+  test('dismissing the player picker via the backdrop records nothing', () => {
     const { document, localStorage } = loadApp({ storage: { hoops_players: players, hoops_current_game: activeGame() } });
 
     click(quickBtn(document, 'A', '2'));
     expect(document.getElementById('picker-overlay').classList.contains('hidden')).toBe(false);
 
-    click(document.getElementById('picker-cancel'));
+    click(document.getElementById('picker-overlay'));
 
     expect(document.getElementById('picker-overlay').classList.contains('hidden')).toBe(true);
     expect(document.getElementById('team-a-score').textContent).toBe('0');
