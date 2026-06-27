@@ -387,13 +387,14 @@ body {
 /* Quick score actions */
 .quick-actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   margin-bottom: 12px;
   flex-shrink: 0;
 }
 
 .quick-team-label {
+  grid-column: span 2;
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
