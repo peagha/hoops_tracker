@@ -555,13 +555,6 @@ body {
   touch-action: manipulation;
 }
 
-.picker-sheet .btn-secondary {
-  width: 100%;
-  height: var(--component-height);
-  background: var(--danger);
-  color: var(--text);
-}
-
 .picker-btn:active {
   background: var(--accent-dim);
 }
