@@ -9,7 +9,7 @@
   --danger: #ef4444;
   --nav-height: 64px;
   --component-height: 96px;
-  --scoreboard-height: calc(var(--component-height) * 1.3);
+  --scoreboard-height: calc(var(--component-height) * 1.53);
 }
 
 * {
